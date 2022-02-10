@@ -1,8 +1,6 @@
 #!/Users/ryo/.rbenv/shims/ruby
 
-count = 1
-
-while count < 21
+20.times { |count|
   case
   when count % 15 == 0
     puts "FizzBuzz"
@@ -13,5 +11,4 @@ while count < 21
   else
     puts count
   end
-  count += 1
-end
+}
