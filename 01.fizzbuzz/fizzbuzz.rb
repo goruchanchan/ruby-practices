@@ -1,14 +1,14 @@
 #!/Users/ryo/.rbenv/shims/ruby
+# frozen_string_literal: true
 
-20.times { |count|
-  case
-  when count % 15 == 0
-    puts "FizzBuzz"
-  when count % 5 == 0
-    puts "Buzz"
-  when count % 3 == 0
-    puts "Fizz"
+20.times do |count|
+  if (count % 15).zero?
+    puts 'FizzBuzz'
+  elsif (count % 5).zero?
+    puts 'Buzz'
+  elsif (count % 3).zero?
+    puts 'Fizz'
   else
     puts count
   end
-}
+end
