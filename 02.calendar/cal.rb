@@ -1,4 +1,4 @@
-#!/Users/ryo/.rbenv/shims/ruby
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 require 'optparse'
@@ -13,13 +13,12 @@ params['y'] = Date.today.year unless params['y']
 puts "      #{params['m']}月 #{params['y']}"
 puts '日 月 火 水 木 金 土'
 
-# newを毎回しちゃうとメモリを食うので、eachの前で変数に格納
 last_day_of_month = Date.new(params['y'].to_i, params['m'].to_i, -1).day
 date = Date.new(params['y'].to_i, params['m'].to_i, 1)
 
-last_day_of_month.times do
-  date.wday.times { print '   ' } if date.day == 1
+print '   ' * date.wday
 
+last_day_of_month.times do
   if date == Date.today
     print Paint[date.day.to_s.rjust(2), :inverse]
   else
