@@ -19,11 +19,8 @@ date = Date.new(params['y'].to_i, params['m'].to_i, 1)
 print '   ' * date.wday
 
 last_day_of_month.times do
-  if date == Date.today
-    print Paint[date.day.to_s.rjust(2), :inverse]
-  else
-    print date.day.to_s.rjust(2)
-  end
+  day = date.day.to_s.rjust(2)
+  print(date == Date.today ? Paint[day, :inverse] : day)
   print ' '
 
   puts if date.saturday?
