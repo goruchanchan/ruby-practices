@@ -6,8 +6,7 @@ scores = score.split(',')
 
 shots = []
 scores.each do |s|
-  shots << 10     if     s == 'X'
-  shots << s.to_i unless s == 'X'
+  shots << (s == 'X' ? 10 : s.to_i)
 end
 
 total_score = 0
@@ -19,11 +18,14 @@ shots.each_with_index do |s, i|
   one_frame_scores << s
 
   if frame_num < 10 && one_frame_scores.sum == 10
-    total_score += shots[i + 1] + shots[i + 2] if one_frame_scores.size == 1 # strike
-    total_score += shots[i + 1]                if one_frame_scores.size == 2 # spare
+    total_score += if one_frame_scores.length == 1
+                     shots[i + 1] + shots[i + 2] # strike
+                   else
+                     shots[i + 1] # spare
+                   end
   end
 
-  if one_frame_scores.size == 2 || one_frame_scores.sum == 10
+  if one_frame_scores.length == 2 || one_frame_scores.sum == 10
     frame_num += 1
     one_frame_scores.clear
   end
