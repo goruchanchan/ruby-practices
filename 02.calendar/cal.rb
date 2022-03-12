@@ -3,7 +3,6 @@
 
 require 'optparse'
 require 'date'
-require 'paint'
 
 params = ARGV.getopts('m:y:')
 
@@ -20,7 +19,7 @@ print '   ' * date.wday
 
 last_day_of_month.times do
   day = date.day.to_s.rjust(2)
-  print(date == Date.today ? Paint[day, :inverse] : day)
+  print(date == Date.today ? "\e[7m#{day}\e[0m" : day)
   print ' '
 
   puts if date.saturday?
