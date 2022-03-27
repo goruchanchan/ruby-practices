@@ -1,53 +1,52 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'optparse'
-ENV['POSIXLY_CORRECT'] = '1'
 MAX_COLUMN = 3
 
-def retrieve_file_list(paths)
-  paths.each_with_index do |path, i|
-    puts unless (i == 0)
-    puts "#{path}:"
-    lists = Dir.glob("*", base: path).sort_by{|x| x.to_i }
-    if lists.size > 0
-      convert_array lists
-    end
+def retrieve_file_list(search_paths)
+  target_paths_file_list = []
+  search_paths.each do |path|
+    file_list = Dir.glob("*", base: path).sort_by{|x| x.to_i }
+    target_paths_file_list << {path: path, file_list: file_list}
   end
+  target_paths_file_list
 end
 
 def convert_array(lists)
-  tranpose_paths = []
+  transpose_paths = []
   padding_num = lists.max {|a, b| a.length <=> b.length }.length
 
   if lists.length % MAX_COLUMN != 0
     start_fill_nil = lists.length + 1
     end_fill_nil = ((lists.length / MAX_COLUMN) + 1) * MAX_COLUMN - 1
     column = (lists.length / MAX_COLUMN) + 1
-    lists.fill(nil,start_fill_nil..end_fill_nil).each_slice(column){|split_array| tranpose_paths.push(split_array)}
+    lists.fill(nil,start_fill_nil..end_fill_nil).each_slice(column){|split_array| transpose_paths.push(split_array)}
   else
     column = (lists.length / MAX_COLUMN)
-    lists.each_slice(column){|split_array| tranpose_paths.push(split_array)}
+    lists.each_slice(column){|split_array| transpose_paths.push(split_array)}
   end
 
-  view_list(tranpose_paths.transpose, padding_num)
+  transpose_paths.transpose
 end
 
-def view_list(file_list, padding_num)
-  file_list.each do |file_row|
-    file_row.each do |file_name|
+def view_hash_list(hash_list, padding_num)
+  hash_list.each_with_index do |file_list,i|
+    puts file_list[:path] + ":" if hash_list.size > 1
+    view_file_list(file_list[:file_list], 10)
+    puts if i < hash_list.length - 1
+  end
+end
+
+def view_file_list(file_list, padding_num)
+  file_list.each do |file_column|
+    file_column.each do |file_name|
       print file_name.to_s.ljust(padding_num + 2)
     end
     puts
   end
 end
 
-opt = OptionParser.new
-opt.on('-a')
-opt.on('-l')
-
-paths = opt.parse(ARGV)
-options = ARGV - paths
+paths = ARGV
 
 file_paths = []
 dir_paths = []
@@ -63,13 +62,25 @@ paths.each do |path|
   end
 end
 
+if error_paths.size > 0
+  error_paths.sort_by{|x| x.to_i }.each  { |error_path| puts "ls: " + error_path + ": No such file or directory" }
+end
+
+file_list = []
+if file_paths.size > 0
+  file_list = convert_array(file_paths.sort_by{|x| x.to_i }) if file_paths.size > 0
+  view_file_list(file_list,10)
+end
+
 if(file_paths.size == 0 && dir_paths.size == 0 && error_paths.size == 0)
-  no_argument_lists = Dir.glob('*', base: '.').sort_by{|x| x.to_i }
-  convert_array no_argument_lists
-else
-  error_paths.sort_by{|x| x.to_i }.each do |error_path|
-    puts "ls: " + error_path + ": No such file or directory"
+  dir_paths.push('.')
+end
+dir_list = []
+if dir_paths.size > 0
+  dir_list = retrieve_file_list(dir_paths.sort_by{|x| x.to_i }) if dir_paths.size > 0
+  dir_list.each do |list|
+    list[:file_list] = convert_array list[:file_list]
   end
-  retrieve_file_list(file_paths.sort_by{|x| x.to_i })
-  retrieve_file_list(dir_paths.sort_by{|x| x.to_i })
+  puts if error_paths.size > 0 || file_paths.size > 0
+  view_hash_list(dir_list,10)
 end
