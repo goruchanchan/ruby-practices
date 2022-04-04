@@ -7,19 +7,19 @@ def main
   all_path_list = argv_parsing # file:引数がファイル, directory:引数がディレクトリ, error:存在しない
   padding_num = search_max_char_length(all_path_list)
 
-  view_error_list(all_path_list)
+  print_error_list(all_path_list)
 
   unless all_path_list[:file].empty?
-    file_list = convert_array_for_view(all_path_list[:file].sort_by(&:to_i))
-    view_file_list(file_list, padding_num)
+    file_list = convert_array_for_print(all_path_list[:file].sort_by(&:to_i))
+    print_file_list(file_list, padding_num)
   end
 
   return if all_path_list[:directory].empty?
 
   puts if !all_path_list[:error].empty? || !all_path_list[:file].empty?
   directory_file_list = retrieve_hash_list(all_path_list[:directory].sort_by(&:to_i))
-  directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_view list[:file_list] }
-  view_hash_list(directory_file_list, padding_num)
+  directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
+  print_hash_list(directory_file_list, padding_num)
 end
 
 def argv_parsing
@@ -51,25 +51,14 @@ def search_max_char_length(path_list)
 end
 
 def retrieve_hash_list(search_paths)
-  target_paths_file_list = []
-  search_paths.each do |path|
-    file_list = Dir.glob('*', base: path).sort_by(&:to_i)
-    target_paths_file_list << { path: path, file_list: file_list }
-  end
-  target_paths_file_list
+  search_paths.map { |path| { path: path, file_list: Dir.glob('*', base: path).sort_by(&:to_i) } }
 end
 
 def retrieve_file_list(search_paths)
-  target_file_list = []
-  search_paths.each do |path|
-    target_file_list.concat(Dir.glob('*', base: path))
-  end
-  target_file_list
+  search_paths.map { |path| Dir.glob('*', base: path) }
 end
 
-def convert_array_for_view(lists)
-  transpose_paths = []
-
+def convert_array_for_print(lists)
   if lists.length % MAX_COLUMN != 0
     # 行列変換させるために足りない要素にnilをつめていく
     start_fill_nil = lists.length + 1
@@ -81,23 +70,24 @@ def convert_array_for_view(lists)
     column = (lists.length / MAX_COLUMN)
   end
 
+  transpose_paths = []
   lists.each_slice(column) { |split_array| transpose_paths.push(split_array) }
   transpose_paths.transpose
 end
 
-def view_error_list(hash_list)
+def print_error_list(hash_list)
   hash_list[:error].sort_by(&:to_i).each { |error_path| puts "ls: #{error_path}: No such file or directory" } unless hash_list[:error].empty?
 end
 
-def view_hash_list(hash_list, padding_num)
+def print_hash_list(hash_list, padding_num)
   hash_list.each_with_index do |file_list, i|
     puts "#{file_list[:path]}:" if hash_list.size > 1
-    view_file_list(file_list[:file_list], padding_num)
+    print_file_list(file_list[:file_list], padding_num)
     puts if i < hash_list.length - 1
   end
 end
 
-def view_file_list(file_list, padding_num)
+def print_file_list(file_list, padding_num)
   file_list.each do |file_column|
     file_column.each do |file_name|
       print file_name.to_s.ljust(padding_num)
