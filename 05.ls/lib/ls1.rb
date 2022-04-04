@@ -55,7 +55,9 @@ def retrieve_hash_list(search_paths)
 end
 
 def retrieve_file_list(search_paths)
-  search_paths.map { |path| Dir.glob('*', base: path) }
+  target_file_list = []
+  search_paths.each { |path| target_file_list.concat(Dir.glob('*', base: path)) }
+  target_file_list
 end
 
 def convert_array_for_print(lists)
@@ -89,9 +91,7 @@ end
 
 def print_file_list(file_list, padding_num)
   file_list.each do |file_column|
-    file_column.each do |file_name|
-      print file_name.to_s.ljust(padding_num)
-    end
+    file_column.each { |file_name| print file_name.to_s.ljust(padding_num) }
     puts
   end
 end
