@@ -10,14 +10,14 @@ def main
   print_error_list(all_path_list)
 
   unless all_path_list[:file].empty?
-    file_list = convert_array_for_print(all_path_list[:file].sort_by(&:to_i))
+    file_list = convert_array_for_print(all_path_list[:file])
     print_file_list(file_list, padding_num)
   end
 
   return if all_path_list[:directory].empty?
 
   puts if !all_path_list[:error].empty? || !all_path_list[:file].empty?
-  directory_file_list = retrieve_hash_list(all_path_list[:directory].sort_by(&:to_i))
+  directory_file_list = retrieve_hash_list(all_path_list[:directory])
   directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
   print_hash_list(directory_file_list, padding_num)
 end
@@ -51,13 +51,11 @@ def search_max_char_length(path_list)
 end
 
 def retrieve_hash_list(search_paths)
-  search_paths.map { |path| { path: path, file_list: Dir.glob('*', base: path).sort_by(&:to_i) } }
+  search_paths.map { |path| { path: path, file_list: Dir.glob('*', base: path) } }
 end
 
 def retrieve_file_list(search_paths)
-  target_file_list = []
-  search_paths.each { |path| target_file_list.concat(Dir.glob('*', base: path)) }
-  target_file_list
+  search_paths.flat_map { |path| Dir.glob('*', base: path) }
 end
 
 def convert_array_for_print(lists)
@@ -78,7 +76,7 @@ def convert_array_for_print(lists)
 end
 
 def print_error_list(hash_list)
-  hash_list[:error].sort_by(&:to_i).each { |error_path| puts "ls: #{error_path}: No such file or directory" } unless hash_list[:error].empty?
+  hash_list[:error].each { |error_path| puts "ls: #{error_path}: No such file or directory" } unless hash_list[:error].empty?
 end
 
 def print_hash_list(hash_list, padding_num)
