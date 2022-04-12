@@ -12,10 +12,11 @@ def main
   categorize_input_list = argv_parsing # file:引数がファイル, directory:引数がディレクトリ, error:存在しない, option: オプション
   padding_num = search_max_char_length(categorize_input_list)
 
-  print_error_list(categorize_input_list)
+  print_error_list(categorize_input_list[:error])
 
   unless categorize_input_list[:file].empty?
-    file_list = convert_array_for_print(categorize_input_list[:file])
+    file_list = parsing_reverse_file_list(categorize_input_list[:file], categorize_input_list[:option])
+    file_list = convert_array_for_print(file_list)
     print_file_list(file_list, padding_num)
   end
 
@@ -23,6 +24,7 @@ def main
 
   puts if !categorize_input_list[:error].empty? || !categorize_input_list[:file].empty?
   directory_file_list = retrieve_hash_list(categorize_input_list[:directory], categorize_input_list[:option])
+  directory_file_list = parsing_reverse_hash_list(directory_file_list, categorize_input_list[:option])
   directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
   print_hash_list(directory_file_list, padding_num)
 end
@@ -30,6 +32,7 @@ end
 def option_parsing
   opt = OptionParser.new
   opt.on('-a')
+  opt.on('-r')
 
   paths = opt.parse(ARGV)
   ARGV - paths
@@ -68,7 +71,7 @@ end
 def retrieve_hash_list(search_paths, options)
   if options.include?('-a')
     # "".."を入れる方法がわからなかったので、ここで入れる。並び替えがずれるので、入れた後にもソートする
-    search_paths.map { |path| { path: path, file_list: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort } }
+    search_paths.map { |path| { path: path, file_list: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort_by(&:to_s) } }
   else
     search_paths.map { |path| { path: path, file_list: Dir.glob('*', base: path) } }
   end
@@ -76,10 +79,27 @@ end
 
 def retrieve_file_list(search_paths, options)
   if options.include?('-a')
-    # "".."を入れる方法がわからなかったので、ここで入れる。並び替えがずれるので、入れた後にもソートする
-    search_paths.flat_map { |path| Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort }
+    # "".."を入れる方法がわからなかったので、ここで入れる。文字最大長を知りたいだけなのでソート不要
+    search_paths.flat_map { |path| Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') }
   else
     search_paths.flat_map { |path| Dir.glob('*', base: path) }
+  end
+end
+
+def parsing_reverse_file_list(file_list, options)
+  if options.include?('-r')
+    file_list.reverse
+  else
+    file_list
+  end
+end
+
+def parsing_reverse_hash_list(hash_list, options)
+  if options.include?('-r')
+    # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
+    hash_list.reverse.map { |hash| { path: hash[:path], file_list: hash[:file_list].sort_by(&:to_s).reverse } }
+  else
+    hash_list
   end
 end
 
@@ -100,20 +120,20 @@ def convert_array_for_print(lists)
   transpose_paths.transpose
 end
 
-def print_error_list(hash_list)
-  hash_list[:error].each { |error_path| puts "ls: #{error_path}: No such file or directory" } unless hash_list[:error].empty?
+def print_error_list(error_list)
+  error_list.each { |error_path| puts "ls: #{error_path}: No such file or directory" } unless error_list.empty?
 end
 
-def print_hash_list(hash_list, padding_num)
-  hash_list.each_with_index do |file_list, i|
-    puts "#{file_list[:path]}:" if hash_list.size > 1
+def print_hash_list(input_hash_list, padding_num)
+  input_hash_list.each_with_index do |file_list, i|
+    puts "#{file_list[:path]}:" if input_hash_list.size > 1
     print_file_list(file_list[:file_list], padding_num)
-    puts if i < hash_list.length - 1
+    puts if i < input_hash_list.length - 1
   end
 end
 
-def print_file_list(file_list, padding_num)
-  file_list.each do |file_column|
+def print_file_list(input_file_list, padding_num)
+  input_file_list.each do |file_column|
     file_column.each { |file_name| print file_name.to_s.ljust(padding_num) }
     puts
   end
