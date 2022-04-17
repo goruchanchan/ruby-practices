@@ -2,6 +2,8 @@
 # frozen_string_literal: true
 
 require 'optparse'
+require 'etc'
+require 'matrix'
 
 # オプションの指定はコマンド直後にしたいので環境変数を設定しておく
 ENV['POSIXLY_CORRECT'] = '1'
@@ -10,14 +12,12 @@ MAX_COLUMN = 3
 
 def main
   categorize_input_list = argv_parsing # file:引数がファイル, directory:引数がディレクトリ, error:存在しない, option: オプション
-  padding_num = search_max_char_length(categorize_input_list)
 
   print_error_list(categorize_input_list[:error])
 
   unless categorize_input_list[:file].empty?
     file_list = parsing_reverse_file_list(categorize_input_list[:file], categorize_input_list[:option])
-    file_list = convert_array_for_print(file_list)
-    print_file_list(file_list, padding_num)
+    print_files(file_list, categorize_input_list)
   end
 
   return if categorize_input_list[:directory].empty?
@@ -25,14 +25,14 @@ def main
   puts if !categorize_input_list[:error].empty? || !categorize_input_list[:file].empty?
   directory_file_list = retrieve_hash_list(categorize_input_list[:directory], categorize_input_list[:option])
   directory_file_list = parsing_reverse_hash_list(directory_file_list, categorize_input_list[:option])
-  directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
-  print_hash_list(directory_file_list, padding_num)
+  print_directories(directory_file_list, categorize_input_list)
 end
 
 def option_parsing
   opt = OptionParser.new
   opt.on('-a')
   opt.on('-r')
+  opt.on('-l')
 
   paths = opt.parse(ARGV)
   ARGV - paths
@@ -136,6 +136,104 @@ def print_file_list(input_file_list, padding_num)
   input_file_list.each do |file_column|
     file_column.each { |file_name| print file_name.to_s.ljust(padding_num) }
     puts
+  end
+end
+
+def convert_list_segment(file_list,path)
+  lists = file_list.map { |file| construct_list_segment(file,path) }
+end
+
+def print_files(file_list, categorize_input_list)
+  if categorize_input_list[:option].include?('-l')
+    file_list = convert_list_segment(file_list, '.')
+    padding_list = (0..6).map { |n| Matrix.columns(file_list).row(n).max.to_s.length }
+    print_list_segment(file_list, padding_list)
+  else
+    file_list = convert_array_for_print(file_list)
+    padding = search_max_char_length(categorize_input_list)
+    print_file_list(file_list, padding)
+  end
+end
+
+def print_directories(directory_file_list, categorize_input_list)
+  if categorize_input_list[:option].include?('-l')
+    directory_file_list.each_with_index do |list,i|
+      list[:file_list] = convert_list_segment(list[:file_list], list[:path])
+      padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
+      print_hash_segment(list, padding_list)
+      puts if i < directory_file_list.length - 1
+    end
+  else
+    directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
+    print_hash_list(directory_file_list, search_max_char_length(categorize_input_list) )
+  end
+end
+
+def print_hash_segment(hash_list, padding_list)
+    puts "#{hash_list[:path]}:" if hash_list.size > 1
+    print_list_segment(hash_list[:file_list], padding_list)
+end
+
+def print_list_segment(lists, padding_list)
+  lists.each do |list|
+    list.each_with_index do |file,i|
+      if i < 5
+        print "#{file.to_s.rjust(padding_list[i])} "
+      else
+        print "#{file.to_s} "
+      end
+    end
+    puts
+  end
+end
+
+def construct_list_segment(file_name,path)
+  list = []
+  full_file_name = "#{path}/#{file_name}"
+  file_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
+  list.push("#{replace_file_type(full_file_name)}#{parsing_permission(file_info.mode)}")
+  list.push(file_info.nlink, Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
+  list.push("#{file_info.atime.to_a[4].to_s.rjust(2)} #{file_info.atime.to_a[3].to_s.rjust(2)} #{file_info.atime.to_a[2].to_s.rjust(2,'0')}:#{file_info.atime.to_a[1].to_s.rjust(2,'0')}")
+  file_name= "#{file_name} -> #{File.readlink(full_file_name)}" if file_info.symlink?
+  list.push(file_name)
+end
+
+def replace_file_type(file_name)
+  case File.ftype(file_name)
+  when "file"
+    "-"
+  when "directory"
+    "d"
+  when "link"
+    "l"
+  end
+end
+
+def parsing_permission(file_mode)
+  owener_permission = ((file_mode >> 6) % 8)
+  group_permission = ((file_mode >> 3) % 8)
+  other_permission = file_mode % 8
+  "#{replace_permission(owener_permission)}#{replace_permission(group_permission)}#{replace_permission(other_permission)}"
+end
+
+def replace_permission(permission)
+  case permission
+  when 0
+    "---"
+  when 1
+    "--x"
+  when 2
+    "-w-"
+  when 3
+    "-wx"
+  when 4
+    "r--"
+  when 5
+    "r-x"
+  when 6
+    "rw-"
+  when 7
+    "rwx"
   end
 end
 
