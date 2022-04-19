@@ -8,6 +8,9 @@ require 'matrix'
 # オプションの指定はコマンド直後にしたいので環境変数を設定しておく
 ENV['POSIXLY_CORRECT'] = '1'
 
+# 配列の順番と権限を組み合わせてみました
+PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
+
 MAX_COLUMN = 3
 
 def main
@@ -201,10 +204,10 @@ def construct_list_segment(file_name, path)
   file_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
   list.push("#{replace_file_type(full_file_name)}#{parsing_permission(file_info.mode)}")
   list.push(file_info.nlink.to_s.rjust(2), Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
-  month = file_info.atime.to_a[4].to_s.rjust(2)
-  day = file_info.atime.to_a[3].to_s.rjust(2)
-  clock = file_info.atime.to_a[2].to_s.rjust(2, '0')
-  minitus = file_info.atime.to_a[1].to_s.rjust(2, '0')
+  month = file_info.mtime.to_a[4].to_s.rjust(2)
+  day = file_info.mtime.to_a[3].to_s.rjust(2)
+  clock = file_info.mtime.to_a[2].to_s.rjust(2, '0')
+  minitus = file_info.mtime.to_a[1].to_s.rjust(2, '0')
   list.push("#{month} #{day} #{clock}:#{minitus}")
   file_name = "#{file_name} -> #{File.readlink(full_file_name)}" if file_info.symlink?
   list.push(file_name)
@@ -218,13 +221,7 @@ def parsing_permission(file_mode)
   owener_permission = ((file_mode >> 6) % 8)
   group_permission = ((file_mode >> 3) % 8)
   other_permission = file_mode % 8
-  "#{replace_permission(owener_permission)}#{replace_permission(group_permission)}#{replace_permission(other_permission)}"
-end
-
-def replace_permission(permission)
-  # 配列の順番と権限を組み合わせてみました
-  permission_array = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx']
-  permission_array[permission]
+  "#{PERMISSION_ARRAY[owener_permission]}#{PERMISSION_ARRAY[group_permission]}#{PERMISSION_ARRAY[other_permission]}"
 end
 
 main
