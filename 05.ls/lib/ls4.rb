@@ -2,22 +2,25 @@
 # frozen_string_literal: true
 
 require 'optparse'
+require 'etc'
+require 'matrix'
 
 # オプションの指定はコマンド直後にしたいので環境変数を設定しておく
 ENV['POSIXLY_CORRECT'] = '1'
+
+# 配列の順番と権限を組み合わせてみました
+PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
 
 MAX_COLUMN = 3
 
 def main
   categorize_input_list = argv_parsing # file:引数がファイル, directory:引数がディレクトリ, error:存在しない, option: オプション
-  padding_num = search_max_char_length(categorize_input_list)
 
   print_error_list(categorize_input_list[:error])
 
   unless categorize_input_list[:file].empty?
     file_list = parsing_reverse_file_list(categorize_input_list[:file], categorize_input_list[:option])
-    file_list = convert_array_for_print(file_list)
-    print_file_list(file_list, padding_num)
+    print_files(file_list, categorize_input_list)
   end
 
   return if categorize_input_list[:directory].empty?
@@ -25,14 +28,14 @@ def main
   puts if !categorize_input_list[:error].empty? || !categorize_input_list[:file].empty?
   directory_file_list = retrieve_hash_list(categorize_input_list[:directory], categorize_input_list[:option])
   directory_file_list = parsing_reverse_hash_list(directory_file_list, categorize_input_list[:option])
-  directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
-  print_hash_list(directory_file_list, padding_num)
+  print_directories(directory_file_list, categorize_input_list)
 end
 
 def option_parsing
   opt = OptionParser.new
   opt.on('-a')
   opt.on('-r')
+  opt.on('-l')
 
   paths = opt.parse(ARGV)
   ARGV - paths
@@ -137,6 +140,88 @@ def print_file_list(input_file_list, padding_num)
     file_column.each { |file_name| print file_name.to_s.ljust(padding_num) }
     puts
   end
+end
+
+def convert_list_segment(file_list, path)
+  file_list.map { |file| construct_list_segment(file, path) }
+end
+
+def calculate_block_size(file_list, path)
+  file_list.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
+end
+
+def print_files(file_list, categorize_input_list)
+  if categorize_input_list[:option].include?('-l')
+    file_list = convert_list_segment(file_list, '.')
+    padding_list = (0..6).map { |n| Matrix.columns(file_list).row(n).max.to_s.length }
+    print_list_segment(file_list, padding_list)
+  else
+    file_list = convert_array_for_print(file_list)
+    padding = search_max_char_length(categorize_input_list)
+    print_file_list(file_list, padding)
+  end
+end
+
+def print_directories(directory_file_list, categorize_input_list)
+  if categorize_input_list[:option].include?('-l')
+    directory_file_list.each_with_index do |list, i|
+      block_size = calculate_block_size(list[:file_list], list[:path])
+      list[:file_list] = convert_list_segment(list[:file_list], list[:path])
+      padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
+      print_hash_segment(list, block_size, padding_list)
+      puts if i < directory_file_list.length - 1
+    end
+  else
+    directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
+    print_hash_list(directory_file_list, search_max_char_length(categorize_input_list))
+  end
+end
+
+def print_hash_segment(hash_list, block_size, padding_list)
+  puts "#{hash_list[:path]}:" if hash_list.size > 1
+  puts "total #{block_size}"
+  print_list_segment(hash_list[:file_list], padding_list)
+end
+
+def print_list_segment(lists, padding_list)
+  lists.each do |list|
+    list.each_with_index do |file, i|
+      if i < 5
+        print "#{file.to_s.rjust(padding_list[i])} "
+        # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
+        print ' ' if i > 1 && i < 4
+      else
+        print "#{file} "
+      end
+    end
+    puts
+  end
+end
+
+def construct_list_segment(file_name, path)
+  list = []
+  full_file_name = "#{path}/#{file_name}"
+  file_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
+  list.push("#{replace_file_type(full_file_name)}#{parsing_permission(file_info.mode)}")
+  list.push(file_info.nlink.to_s.rjust(2), Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
+  month = file_info.mtime.to_a[4].to_s.rjust(2)
+  day = file_info.mtime.to_a[3].to_s.rjust(2)
+  clock = file_info.mtime.to_a[2].to_s.rjust(2, '0')
+  minitus = file_info.mtime.to_a[1].to_s.rjust(2, '0')
+  list.push("#{month} #{day} #{clock}:#{minitus}")
+  file_name = "#{file_name} -> #{File.readlink(full_file_name)}" if file_info.symlink?
+  list.push(file_name)
+end
+
+def replace_file_type(file_name)
+  { file: '-', directory: 'd', link: 'l' }[File.ftype(file_name)]
+end
+
+def parsing_permission(file_mode)
+  owener_permission = ((file_mode >> 6) % 8)
+  group_permission = ((file_mode >> 3) % 8)
+  other_permission = file_mode % 8
+  "#{PERMISSION_ARRAY[owener_permission]}#{PERMISSION_ARRAY[group_permission]}#{PERMISSION_ARRAY[other_permission]}"
 end
 
 main
