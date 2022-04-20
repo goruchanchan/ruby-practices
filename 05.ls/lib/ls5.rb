@@ -34,7 +34,11 @@ end
 def argument_parsing
   raw_argument = []
   ARGV.each do |argument|
-    raw_argument.push(argument) if argument.include?('-')
+    if argument.include?('-')
+      raw_argument.push(argument) 
+    else
+      break
+    end
   end
 
   options = []
