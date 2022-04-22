@@ -31,14 +31,24 @@ def main
   print_directories(directory_file_list, categorize_input_list)
 end
 
-def option_parsing
-  opt = OptionParser.new
-  opt.on('-a')
-  opt.on('-r')
-  opt.on('-l')
+def argument_parsing
+  raw_argument = []
+  ARGV.each do |argument|
+    if argument.include?('-')
+      raw_argument.push(argument) 
+    else
+      break
+    end
+  end
 
-  paths = opt.parse(ARGV)
-  ARGV - paths
+  options = []
+  raw_argument.each do |option|
+    options.push('-a') if option.include?('a')
+    options.push('-r') if option.include?('r')
+    options.push('-l') if option.include?('l')
+  end
+
+  { argument: raw_argument, argument_option: options }
 end
 
 def argv_parsing
@@ -46,9 +56,9 @@ def argv_parsing
   directory_paths = []
   error_paths = []
 
-  options = option_parsing
+  argument = argument_parsing
 
-  (ARGV - option_parsing).each do |path|
+  (ARGV - argument[:argument]).each do |path|
     if FileTest.directory?(path)
       directory_paths.push(path)
     elsif FileTest.file?(path)
@@ -60,7 +70,7 @@ def argv_parsing
 
   directory_paths.push('.') if file_paths.empty? && directory_paths.empty? && error_paths.empty?
 
-  { file: file_paths.sort, directory: directory_paths.sort, error: error_paths.sort, option: options.sort }
+  { file: file_paths.sort, directory: directory_paths.sort, error: error_paths.sort, option: argument[:argument_option].sort }
 end
 
 def search_max_char_length(categorize_list)
@@ -137,7 +147,7 @@ end
 
 def print_file_list(input_file_list, padding_num)
   input_file_list.each do |file_column|
-    file_column.each { |file_name| print file_name.to_s.ljust(padding_num) }
+    file_column.each { |file_name| print file_name.to_s.ljust(padding_num + 1) }
     puts
   end
 end
@@ -168,6 +178,7 @@ def print_directories(directory_file_list, categorize_input_list)
       block_size = calculate_block_size(list[:file_list], list[:path])
       list[:file_list] = convert_list_segment(list[:file_list], list[:path])
       padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
+      puts "#{list[:path]}:" if directory_file_list.size > 1
       print_hash_segment(list, block_size, padding_list)
       puts if i < directory_file_list.length - 1
     end
@@ -178,7 +189,6 @@ def print_directories(directory_file_list, categorize_input_list)
 end
 
 def print_hash_segment(hash_list, block_size, padding_list)
-  puts "#{hash_list[:path]}:" if hash_list.size > 1
   puts "total #{block_size}"
   print_list_segment(hash_list[:file_list], padding_list)
 end
@@ -214,7 +224,7 @@ def construct_list_segment(file_name, path)
 end
 
 def replace_file_type(file_name)
-  { file: '-', directory: 'd', link: 'l' }[File.ftype(file_name)]
+  { file: '-', directory: 'd', link: 'l' }[File.ftype(file_name).intern]
 end
 
 def parsing_permission(file_mode)
