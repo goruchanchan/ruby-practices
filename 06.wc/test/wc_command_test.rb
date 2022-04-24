@@ -14,8 +14,12 @@ class WcCommandTest < Minitest::Test
     assert_equal expected, run_wc_command
   end
 
+  def test_file_l_option
+    expected = `wc -l #{TARGET_FILE_PATH}`
+    assert_equal expected, run_wc_command
+  end
+
   def test_standard_io
-    test_input_standard = "123\n45\nab\ncdef"
     expected = `echo "123\n45\nab\ncdef" | wc`
     assert_equal expected, run_wc_command
   end
@@ -34,5 +38,4 @@ class WcCommandTest < Minitest::Test
     expected = `ls -l #{TARGET_FILE_PATH}|wc`
     assert_equal expected, run_wc_command
   end
-    
 end
