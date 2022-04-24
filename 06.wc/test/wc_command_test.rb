@@ -26,12 +26,12 @@ class WcCommandTest < Minitest::Test
   end
 
   def test_usr_ls_comannd
-    expected = `ls -l #{TARGET_PATH}|wc`# 自分で作ったパスに変更
+    expected = `ls -l #{TARGET_FILE_PATH}|wc`# 自分で作ったパスに変更
     assert_equal expected, run_wc_command
   end
 
   def test_ls_comannd
-    expected = `ls -l #{TARGET_PATH}|wc`
+    expected = `ls -l #{TARGET_FILE_PATH}|wc`
     assert_equal expected, run_wc_command
   end
     
