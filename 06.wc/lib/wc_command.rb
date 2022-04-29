@@ -7,14 +7,17 @@ def run_wc_command(file_path:nil , line_format: false, input_command: nil)
   if file_path.nil?
 
   else
-    concat_wc_contents file_path.to_s
+    concat_wc_contents(file_path.to_s, line_format)
   end
 
 end
 
-def concat_wc_contents(file_path)
+def concat_wc_contents(file_path, line_format)
   sentence = File.open(file_path).read
-  count_lines(sentence).rjust(8) + count_words(sentence).rjust(8) + count_bytes(sentence).rjust(8) + " " +file_path
+
+  wc_contents = count_lines(sentence).rjust(8)
+  wc_contents += count_words(sentence).rjust(8) + count_bytes(sentence).rjust(8) unless line_format
+  wc_contents += " " +file_path
 end
 
 def count_lines(sentence)
@@ -32,6 +35,3 @@ end
 def count_bytes(sentence)
   sentence.size.to_s
 end
-
-#run_wc_command file_path: "test/sample_dir/sample.rb"
-#run_wc_command(file_path: './test/sample_dir/sample.rb')

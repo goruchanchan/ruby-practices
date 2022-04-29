@@ -14,10 +14,10 @@ class WcCommandTest < Minitest::Test
     assert_equal expected, run_wc_command(file_path: './test/sample_dir/sample.rb')
   end
 
-  # def test_file_l_option
-  #   expected = `wc -l #{TARGET_FILE_PATH}`
-  #   assert_equal expected, run_wc_command(file_path: TARGET_FILE_PATH, line_format: true)
-  # end
+  def test_file_l_option
+    expected = `wc -l #{TARGET_FILE_PATH}`.chomp
+    assert_equal expected, run_wc_command(file_path: TARGET_FILE_PATH, line_format: true)
+  end
 
   # def test_standard_io
   #   expected = `echo "123\n45\nab\ncdef" | wc`
