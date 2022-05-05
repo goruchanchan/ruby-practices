@@ -33,7 +33,7 @@ def get_total_size(params)
   if params[:l_option]
     "#{TOTAL_SIZE[:lines].to_s.rjust(8)} total"
   else
-    "#{TOTAL_SIZE[:lines].to_s.rjust(8)} #{TOTAL_SIZE[:words].to_s.rjust(8)} #{TOTAL_SIZE[:bytes].to_s.rjust(8)} total"
+    "#{TOTAL_SIZE[:lines].to_s.rjust(8)}#{TOTAL_SIZE[:words].to_s.rjust(8)}#{TOTAL_SIZE[:bytes].to_s.rjust(8)} total"
   end
 end
 
@@ -52,7 +52,4 @@ end
 def count_bytes(sentence)
   sentence.size.to_s
 end
-
-# TARGET_FILE_PATH = Pathname('./test/sample_dir/sample.rb')
-# puts run_wc_command(file_path: TARGET_FILE_PATH)
 

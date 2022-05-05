@@ -2,12 +2,11 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
-require './lib/wc_command'
 require 'pathname'
+require './lib/wc_command'
 
 class WcCommandTest < Minitest::Test
   TARGET_FILE_PATH = Pathname('./test/sample_dir/sample.rb')
-  TARGET_FILES_PATH = './test/sample_dir/sample.rb  ./test/sample_dir/9'
 
   def test_file
     expected = `wc #{TARGET_FILE_PATH}`.chomp
@@ -24,18 +23,13 @@ class WcCommandTest < Minitest::Test
     assert_equal expected, run_wc(sentence: "123\n45\nab\ncdef\n") # echoで呼び出すと最終行に改行が含まれるので入れる
   end
 
-  # def test_files
-  #   expected = `wc #{TARGET_FILES_PATH}`
-  #   assert_equal expected, run_wc
-  # end
-
   # def test_usr_ls_comannd
-  #   expected = `ls -l #{TARGET_FILE_PATH}|wc`# 自分で作ったパスに変更
-  #   assert_equal expected, run_wc
+  #   expected = `../05.ls/lib/ls5.rb -l #{TARGET_FILE_PATH}|wc`.chomp# 自分で作ったパスに変更
+  #   assert_equal expected, run_wc(sentence: "-rw-r--r--  1 ryo  staff  31  4 29 07:34 ./test/sample_dir/sample.rb")
   # end
 
   def test_ls_comannd
-    expected = `ls -l #{TARGET_FILE_PATH}|wc`
-    assert_equal expected, run_wc(l_option: '-l')
+    expected = `ls -l #{TARGET_FILE_PATH}|wc`.chomp
+    assert_equal expected, run_wc(sentence: "-rw-r--r--  1 ryo  staff  31  4 29 07:34 ./test/sample_dir/sample.rb\n")# パイプで渡すと改行が挿入されるので入れる
   end
 end
