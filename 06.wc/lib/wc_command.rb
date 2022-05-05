@@ -3,7 +3,7 @@
 
 require 'pathname'
 
-TOTAL_SIZE = {words: 0, lines: 0, bytes: 0}
+TOTAL_SIZE = { words: 0, lines: 0, bytes: 0 }
 
 def run_wc(file_path: nil, sentence: nil, l_option: false)
   if sentence.nil?
@@ -25,7 +25,7 @@ def concat_wc_contents(file_path, l_option, sentence)
     TOTAL_SIZE[:bytes] += bytes_cnt.to_i
     wc_contents += words_cnt.rjust(8) + bytes_cnt.rjust(8)
   end
-  wc_contents += " " +  file_path.to_s unless file_path.nil?
+  wc_contents << " #{file_path}" unless file_path.nil?
   wc_contents
 end
 
@@ -40,7 +40,7 @@ end
 def count_lines(sentence)
   # https://docs.ruby-lang.org/ja/latest/method/String/i/count.html
   lines = sentence.count("\n")
-  lines += 1 if /[^\n]\z/ =~ sentence
+  lines += 1 if sentence.match?(/[^\n]\z/)
   lines.to_s
 end
 
