@@ -52,4 +52,3 @@ end
 def count_bytes(sentence)
   sentence.size.to_s
 end
-
