@@ -25,5 +25,5 @@ else
       puts run_wc(file_path: pathname, sentence: nil)
     end
   end
-  puts get_total_size(wc_contents, params) if ARGV.size > 1
+  puts calculate_total_size(wc_contents, params) if ARGV.size > 1
 end

@@ -38,7 +38,7 @@ def count_bytes(sentence)
   sentence.size.to_s
 end
 
-def get_total_size(contents, params)
+def calculate_total_size(contents, params)
   total = { line: 0, word: 0, byte: 0 }
   contents.each do |content|
     total[:line] += content.split[0].to_i
