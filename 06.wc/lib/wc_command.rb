@@ -3,8 +3,6 @@
 
 require 'pathname'
 
-TOTAL_SIZE = { words: 0, lines: 0, bytes: 0 }
-
 def run_wc(file_path: nil, sentence: nil, l_option: false)
   if sentence.nil?
     "wc: #{file_path}: open: No such file or directory"
@@ -18,23 +16,10 @@ def concat_wc_contents(file_path, l_option, sentence)
   words_cnt = count_words(sentence)
   bytes_cnt = count_bytes(sentence)
 
-  TOTAL_SIZE[:lines] += lines_cnt.to_i
   wc_contents = lines_cnt.rjust(8)
-  unless l_option
-    TOTAL_SIZE[:words] += words_cnt.to_i
-    TOTAL_SIZE[:bytes] += bytes_cnt.to_i
-    wc_contents += words_cnt.rjust(8) + bytes_cnt.rjust(8)
-  end
+  wc_contents += words_cnt.rjust(8) + bytes_cnt.rjust(8) unless l_option
   wc_contents << " #{file_path}" unless file_path.nil?
   wc_contents
-end
-
-def get_total_size(params)
-  if params[:l_option]
-    "#{TOTAL_SIZE[:lines].to_s.rjust(8)} total"
-  else
-    "#{TOTAL_SIZE[:lines].to_s.rjust(8)}#{TOTAL_SIZE[:words].to_s.rjust(8)}#{TOTAL_SIZE[:bytes].to_s.rjust(8)} total"
-  end
 end
 
 def count_lines(sentence)
@@ -51,4 +36,18 @@ end
 
 def count_bytes(sentence)
   sentence.size.to_s
+end
+
+def get_total_size(contents, params)
+  total = { line: 0, word: 0, byte: 0 }
+  contents.each do |content|
+    total[:line] += content.split[0].to_i
+    total[:word] += content.split[1].to_i
+    total[:byte] += content.split[2].to_i
+  end
+  if params[:l_option]
+    "#{total_line.rjust(8)} total"
+  else
+    "#{total[:line].to_s.rjust(8)}#{total[:word].to_s.rjust(8)}#{total[:byte].to_s.rjust(8)} total"
+  end
 end
