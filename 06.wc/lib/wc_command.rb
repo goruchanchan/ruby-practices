@@ -4,11 +4,9 @@
 require 'pathname'
 
 def run_wc(file_path: nil, sentence: nil, l_option: false)
-  if sentence.nil?
-    return "wc: #{file_path}: open: No such file or directory"
-  else
-    concat_wc_contents(file_path, l_option, sentence)
-  end
+  return "wc: #{file_path}: open: No such file or directory" if sentence.nil?
+
+  concat_wc_contents(file_path, l_option, sentence)
 end
 
 def concat_wc_contents(file_path, l_option, sentence)
