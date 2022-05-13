@@ -3,8 +3,8 @@
 
 require 'pathname'
 
-def run_wc(file_path: nil, sentence: nil, l_option: false)
-  hash_content = count_wc_contents(sentence)
+def run_wc(sentence: nil)
+  count_wc_contents(sentence)
 end
 
 def test_run_wc(file_path: nil, sentence: nil, l_option: false)
@@ -18,7 +18,7 @@ def count_wc_contents(sentence)
   { line: count_lines(sentence), word: count_words(sentence), byte: count_bytes(sentence) }
 end
 
-def concat_hash_contents(content:nil, file_path: nil, l_option: false)
+def concat_hash_contents(content: nil, file_path: nil, l_option: false)
   wc_contents = content[:line].to_s.rjust(8)
   wc_contents += content[:word].to_s.rjust(8) + content[:byte].to_s.rjust(8) unless l_option
   wc_contents += " #{file_path}" unless file_path.nil?
@@ -29,7 +29,7 @@ def sum_contents_size(total_size, hash_content)
   line = total_size[:line] + hash_content[:line]
   word = total_size[:word] + hash_content[:word]
   byte = total_size[:byte] + hash_content[:byte]
-  { line: line, word: word, byte: byte }  
+  { line: line, word: word, byte: byte }
 end
 
 def count_lines(sentence)
