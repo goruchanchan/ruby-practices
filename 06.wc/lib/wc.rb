@@ -14,19 +14,21 @@ def main
   opt.parse!(ARGV)
 
   if ARGV.empty?
-    puts run_wc(sentence: $stdin.read, **params)
+    hash_content = run_wc(sentence: $stdin.read)
+    puts concat_hash_contents(content: hash_content, **params)
   else
-    wc_contents = []
+    total_size = {line: 0, word: 0, byte: 0}
     ARGV.each do |file_path|
       pathname = Pathname(file_path)
       if FileTest.exist?(file_path)
-        puts sentence_print = run_wc(file_path: pathname, sentence: File.open(file_path).read, **params)
-        wc_contents.push(sentence_print)
+        hash_content = run_wc(sentence: File.open(file_path).read, file_path: pathname, **params)
+        puts concat_hash_contents(content: hash_content, file_path: pathname, **params)
+        total_size = sum_contents_size(total_size, hash_content)
       else
-        puts run_wc(file_path: pathname, sentence: nil)
+        puts "wc: #{pathname}: open: No such file or directory"
       end
     end
-    puts calculate_total_size(wc_contents, params) if ARGV.size > 1
+    puts calculate_total_size(total_size, params) if ARGV.size > 1
   end
 end
 
