@@ -16,7 +16,7 @@ def concat_wc_contents(file_path, l_option, sentence)
 
   wc_contents = lines_cnt.rjust(8)
   wc_contents += words_cnt.rjust(8) + bytes_cnt.rjust(8) unless l_option
-  wc_contents << " #{file_path}" unless file_path.nil?
+  wc_contents += " #{file_path}" unless file_path.nil?
   wc_contents
 end
 
