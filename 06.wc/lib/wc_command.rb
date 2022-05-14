@@ -47,9 +47,3 @@ end
 def count_bytes(sentence)
   sentence.size
 end
-
-def calculate_total_size(total, params)
-  return "#{total[:line].to_s.rjust(8)} total" if params[:l_option]
-
-  "#{total[:line].to_s.rjust(8)}#{total[:word].to_s.rjust(8)}#{total[:byte].to_s.rjust(8)} total"
-end

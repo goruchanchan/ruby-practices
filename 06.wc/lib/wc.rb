@@ -25,7 +25,7 @@ def main
         puts "wc: #{Pathname(file_path)}: open: No such file or directory"
       end
     end
-    puts calculate_total_size(total_size, params) if ARGV.size > 1
+    puts concat_hash_contents(content: total_size, file_path: 'total', **params) if ARGV.size > 1
   end
 end
 
