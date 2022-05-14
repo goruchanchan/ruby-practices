@@ -18,7 +18,7 @@ def main
     total_size = { line: 0, word: 0, byte: 0 }
     ARGV.each do |file_path|
       if FileTest.exist?(file_path)
-        hash_content = run_wc(sentence: File.open(file_path).read, file_path: Pathname(file_path), **params)
+        hash_content = run_wc(sentence: File.open(file_path).read)
         puts concat_hash_contents(content: hash_content, file_path: Pathname(file_path), **params)
         total_size = sum_contents_size(total_size, hash_content)
       else
