@@ -15,7 +15,13 @@ end
 def count_wc_contents(sentence)
   return nil if sentence.nil?
 
-  { line: count_lines(sentence), word: count_words(sentence), byte: count_bytes(sentence) }
+  # シンボルの配列を用意して、each_with_objectでハッシュを返す。
+  # https://docs.ruby-lang.org/ja/latest/method/Enumerable/i/each_with_object.html
+  # sendメソッドで引数で渡したメソッドの実行結果を取得。式展開でハッシュキーを用いることでループ処理する
+  # https://docs.ruby-lang.org/ja/latest/method/Object/i/send.html
+  # シンボル配列であることをわかりやすくするように%記法を用いる(rubocop指摘)
+  # https://docs.ruby-lang.org/ja/latest/doc/spec=2fliteral.html#percent
+  %i[line word byte].each_with_object({}) { |key, result| result[key] = send("count_#{key}s", sentence) }
 end
 
 def concat_hash_contents(content: nil, file_path: nil, l_option: false)
@@ -26,10 +32,10 @@ def concat_hash_contents(content: nil, file_path: nil, l_option: false)
 end
 
 def sum_contents_size(total_size, hash_content)
-  line = total_size[:line] + hash_content[:line]
-  word = total_size[:word] + hash_content[:word]
-  byte = total_size[:byte] + hash_content[:byte]
-  { line: line, word: word, byte: byte }
+  # count_wc_contentsの使い方と同じ
+  %i[line word byte].each_with_object({}) do |key, result|
+    result[key] = total_size[key] + hash_content[key]
+  end
 end
 
 def count_lines(sentence)
