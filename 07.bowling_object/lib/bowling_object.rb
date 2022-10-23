@@ -35,29 +35,40 @@ def calculate_score(input)
 
   shots.each_with_index do |s, i|
     frame_shots << s
-    if frame_scores.size < 9
+    if frame_scores.size < 9 # 〜9投目
       if frame_shots.size % 2 == 0 || s.score == 10
-        frame_scores << (s.score == 10 ? Frame.new(frame_shots[0]) : Frame.new(frame_shots[0], frame_shots[1]))
+        frame_scores << if frame_shots.size == 1
+                          Frame.new(frame_shots[0])
+                        else
+                          Frame.new(frame_shots[0], frame_shots[1])
+                        end
         frame_shots.clear
       end
-    else
-      if frame_shots.size == 3 || (frame_shots.size == 2 && frame_shots[0].score + frame_shots[1].score < 10)
-        frame_scores << (frame_shots.size == 3 ? Frame.new(frame_shots[0], frame_shots[1], frame_shots[2]) : Frame.new(frame_shots[0], frame_shots[1]))
+    else # 10投目
+      if frame_shots.size == 3 || (frame_shots.size == 2 && (frame_shots[0].score + frame_shots[1].score < 10) )
+        frame_scores << if frame_shots.size == 3
+                          Frame.new(frame_shots[0], frame_shots[1], frame_shots[2])
+                        else
+                          Frame.new(frame_shots[0], frame_shots[1])
+                        end
       end
     end
   end
-
   total_score = 0
 
   frame_scores.each_with_index do |s, i|
     total_score += s.score
-
     if i < 9 && s.score == 10
-      total_score += if s.second_shot.nil?
-                        frame_scores[i + 1].second_shot.nil? ? frame_scores[i + 1].first_shot.score * 2 : frame_scores[i + 1].first_shot.score + frame_scores[i + 1].second_shot.score# strike
-                      else
-                        frame_scores[i + 1].first_shot.score # spare
-                      end
+      total_score += if s.second_shot.nil? #strike
+                       if frame_scores[i + 1].second_shot.nil?
+                        frame_scores[i + 1].score + frame_scores[i + 2].first_shot.score
+                       else
+                        # frame_scores[i + 1].score だと10フレーム目で３投目を余分に足してしまうので、下の形式
+                        frame_scores[i + 1].first_shot.score + frame_scores[i + 1].second_shot.score
+                       end
+                     else # spare
+                       frame_scores[i + 1].first_shot.score
+                     end
     end
   end
   total_score
@@ -65,8 +76,5 @@ end
 
 def main
   scores = ARGV[0].split(',')
-  shots = scores.map { |s| Shot.new(s) }
-
-  puts calculate_score(shots)
+  puts calculate_score(scores)
 end
-
