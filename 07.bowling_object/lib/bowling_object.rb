@@ -27,7 +27,9 @@ class Frame
   end
 end
 
-def calculate_score(shots)
+def calculate_score(input)
+  shots = input.map { |s| Shot.new(s) }
+
   frame_shots = []
   frame_scores = []
 
@@ -68,4 +70,3 @@ def main
   puts calculate_score(shots)
 end
 
-main
