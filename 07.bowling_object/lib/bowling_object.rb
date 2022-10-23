@@ -12,32 +12,29 @@ class Shot
 end
 
 class Frame
-  attr_reader :first_shot, :second_shot
   def initialize(first_shot, second_shot = nil, third_shot = nil)
     @first_shot = first_shot
     @second_shot = second_shot
     @third_shot = third_shot
   end
 
-  def score
-    frame_score = score_2shots
-    frame_score += @third_shot.score unless @third_shot.nil?
-    frame_score
+  def score_1shot
+    @first_shot.score
   end
 
   def score_2shots
-    frame_score = @first_shot.score
-    frame_score += @second_shot.score unless @second_shot.nil?
-    frame_score
+    @second_shot.nil? ? score_1shot : score_1shot + @second_shot.score
+  end
+
+  def score_3shots
+    @third_shot.nil? ? score_2shots : score_2shots + @third_shot.score
   end
 
   def frame_type
-    if @first_shot.score == 10
+    if score_1shot == 10
       return :strike
-    elsif (@first_shot.score + @second_shot.score == 10)
+    elsif (score_2shots == 10)
       return :spare
-    else
-      return :none
     end
   end
 end
@@ -72,18 +69,18 @@ def calculate_score(input)
   total_score = 0
 
   frame_scores.each_with_index do |s, i|
-    total_score += s.score
+    total_score += s.score_3shots
     
     if i < 9 
       case s.frame_type
       when :strike
         total_score += if (frame_scores[i + 1].frame_type == :strike && i < 8)
-          frame_scores[i + 1].score + frame_scores[i + 2].first_shot.score
+          frame_scores[i + 1].score_2shots + frame_scores[i + 2].score_1shot
         else
           frame_scores[i + 1].score_2shots
         end
       when :spare
-        total_score += frame_scores[i + 1].first_shot.score
+        total_score += frame_scores[i + 1].score_1shot
       end
     end
   end
