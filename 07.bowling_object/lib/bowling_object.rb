@@ -20,10 +20,25 @@ class Frame
   end
 
   def score
-    frame_score = @first_shot.score
-    frame_score += @second_shot.score unless @second_shot.nil?
+    frame_score = score_2shots
     frame_score += @third_shot.score unless @third_shot.nil?
     frame_score
+  end
+
+  def score_2shots
+    frame_score = @first_shot.score
+    frame_score += @second_shot.score unless @second_shot.nil?
+    frame_score
+  end
+
+  def frame_type
+    if @first_shot.score == 10
+      return :strike
+    elsif (@first_shot.score + @second_shot.score == 10)
+      return :spare
+    else
+      return :none
+    end
   end
 end
 
@@ -58,17 +73,18 @@ def calculate_score(input)
 
   frame_scores.each_with_index do |s, i|
     total_score += s.score
-    if i < 9 && s.score == 10
-      total_score += if s.second_shot.nil? #strike
-                       if frame_scores[i + 1].second_shot.nil?
-                        frame_scores[i + 1].score + frame_scores[i + 2].first_shot.score
-                       else
-                        # frame_scores[i + 1].score だと10フレーム目で３投目を余分に足してしまうので、下の形式
-                        frame_scores[i + 1].first_shot.score + frame_scores[i + 1].second_shot.score
-                       end
-                     else # spare
-                       frame_scores[i + 1].first_shot.score
-                     end
+    
+    if i < 9 
+      case s.frame_type
+      when :strike
+        total_score += if (frame_scores[i + 1].frame_type == :strike && i < 8)
+          frame_scores[i + 1].score + frame_scores[i + 2].first_shot.score
+        else
+          frame_scores[i + 1].score_2shots
+        end
+      when :spare
+        total_score += frame_scores[i + 1].first_shot.score
+      end
     end
   end
   total_score
