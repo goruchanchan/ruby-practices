@@ -5,7 +5,7 @@ class Shot
   def initialize(mark)
     @mark = mark
   end
-  def score
+  def get_shot_score
     @mark == 'X' ? 10 : @mark.to_i
   end
 end
@@ -17,21 +17,21 @@ class Frame
     @third_shot = frame_shots[2] unless frame_shots[2].nil?
   end
 
-  def score_1shot
-    @first_shot.score
+  def get_score_1shot
+    @first_shot.get_shot_score
   end
 
-  def score_2shots
-    @second_shot.nil? ? score_1shot : score_1shot + @second_shot.score
+  def get_score_2shots
+    @second_shot.nil? ? get_score_1shot : get_score_1shot + @second_shot.get_shot_score
   end
 
-  def frame_score
-    @third_shot.nil? ? score_2shots : score_2shots + @third_shot.score
+  def get_frame_score
+    @third_shot.nil? ? get_score_2shots : get_score_2shots + @third_shot.get_shot_score
   end
 
-  def frame_type
-    return :strike if score_1shot == 10
-    return :spare if score_2shots == 10
+  def get_frame_type
+    return :strike if get_score_1shot == 10
+    return :spare if get_score_2shots == 10
   end
 end
 
@@ -47,7 +47,7 @@ class Game
     shots.each_with_index do |shot, i|
       frame_shots << shot
       if @frames.size < 9 # 〜9投目
-        if frame_shots.size % 2 == 0 || shot.score == 10
+        if frame_shots.size % 2 == 0 || shot.get_shot_score == 10
           @frames << Frame.new(frame_shots)
           frame_shots.clear
         end
@@ -59,26 +59,26 @@ class Game
 
   def sum_down_marks
     @frames.each do |frame|
-      @total_marks += frame.frame_score
+      @total_marks += frame.get_frame_score
     end
   end
 
   def sum_additional_marks
     @frames.each_with_index do |frame,i|
        if i < 9 
-        case frame.frame_type
+        case frame.get_frame_type
         when :strike
-          @total_marks += @frames[i + 1].score_2shots
+          @total_marks += @frames[i + 1].get_score_2shots
           # 9フレームにストライクで、10フレームでストライクを取っても次のフレームには移動しない
-          @total_marks += @frames[i + 2].score_1shot if @frames[i + 1].frame_type == :strike && i < 8
+          @total_marks += @frames[i + 2].get_score_1shot if @frames[i + 1].get_frame_type == :strike && i < 8
         when :spare
-          @total_marks += @frames[i + 1].score_1shot
+          @total_marks += @frames[i + 1].get_score_1shot
         end
       end
     end
   end
 
-  def game_score
+  def get_game_score
     sum_down_marks
     sum_additional_marks
     @total_marks
@@ -86,7 +86,7 @@ class Game
 end
 
 def calculate_score(input)
-  Game.new( input.map { |shot| Shot.new(shot) } ).game_score
+  Game.new( input.map { |shot| Shot.new(shot) } ).get_game_score
 end
 
 def main
@@ -94,4 +94,4 @@ def main
   puts calculate_score(scores)
 end
 
-main
+#main
