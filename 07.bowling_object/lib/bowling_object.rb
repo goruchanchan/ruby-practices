@@ -12,10 +12,10 @@ class Shot
 end
 
 class Frame
-  def initialize(first_shot, second_shot = nil, third_shot = nil)
-    @first_shot = first_shot
-    @second_shot = second_shot
-    @third_shot = third_shot
+  def initialize(frame_shots)
+    @first_shot = frame_shots[0]
+    @second_shot = frame_shots[1] unless frame_shots[1].nil?
+    @third_shot = frame_shots[2] unless frame_shots[2].nil?
   end
 
   def score_1shot
@@ -49,25 +49,15 @@ def calculate_score(input)
     frame_shots << s
     if frame_scores.size < 9 # 〜9投目
       if frame_shots.size % 2 == 0 || s.score == 10
-        frame_scores << if frame_shots.size == 1
-                          Frame.new(frame_shots[0])
-                        else
-                          Frame.new(frame_shots[0], frame_shots[1])
-                        end
+        frame_scores << Frame.new(frame_shots)
         frame_shots.clear
       end
     else # 10投目
-      if frame_shots.size == 3 || (frame_shots.size == 2 && (frame_shots[0].score + frame_shots[1].score < 10) )
-        frame_scores << if frame_shots.size == 3
-                          Frame.new(frame_shots[0], frame_shots[1], frame_shots[2])
-                        else
-                          Frame.new(frame_shots[0], frame_shots[1])
-                        end
-      end
+      frame_scores << Frame.new(frame_shots) if (shots.length - 1) == i
     end
   end
-  total_score = 0
 
+  total_score = 0
   frame_scores.each_with_index do |s, i|
     total_score += s.score_3shots
     
@@ -91,3 +81,5 @@ def main
   scores = ARGV[0].split(',')
   puts calculate_score(scores)
 end
+
+#main
