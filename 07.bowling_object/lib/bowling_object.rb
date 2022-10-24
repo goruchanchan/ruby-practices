@@ -92,7 +92,7 @@ end
 
 def main
   scores = ARGV[0].split(',')
-  calculate_score(scores)
+  puts calculate_score(scores)
 end
 
 main
