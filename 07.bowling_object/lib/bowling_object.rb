@@ -52,8 +52,8 @@ class Game
           @frames << Frame.new(frame_shots)
           frame_shots.clear
         end
-      elsif shots.length - 1 == i
-        @frames << Frame.new(frame_shots) # 10フレーム目
+      elsif shots.length - 1 == i # 10フレーム目
+        @frames << Frame.new(frame_shots)
       end
     end
   end
@@ -71,7 +71,7 @@ class Game
       case frame.score_type
       when :strike
         @total_marks += @frames[i + 1].score_2shots
-        # 9フレームにストライクで、10フレームでストライクを取っても次のフレームには移動しない
+        # 9フレームにストライクで、10フレームでストライクを取っても次のフレームには移動しないので条件付け
         @total_marks += @frames[i + 2].score_1shot if @frames[i + 1].score_type == :strike && i < @frames.length - 2
       when :spare
         @total_marks += @frames[i + 1].score_1shot
