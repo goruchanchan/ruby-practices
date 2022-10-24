@@ -5,6 +5,7 @@ class Shot
   def initialize(mark)
     @mark = mark
   end
+
   def score
     @mark == 'X' ? 10 : @mark.to_i
   end
@@ -46,11 +47,14 @@ class Game
     frame_shots = []
     shots.each_with_index do |shot, i|
       frame_shots << shot
-      if ( @frames.size < 9 && (frame_shots.size % 2 == 0 || shot.score == 10) ) # 〜9フレーム目
-        @frames << Frame.new(frame_shots)
-        frame_shots.clear
+      if @frames.size < 9 # 〜9フレーム目
+        if (frame_shots.size % 2).zero? || shot.score == 10
+          @frames << Frame.new(frame_shots)
+          frame_shots.clear
+        end
+      elsif shots.length - 1 == i
+        @frames << Frame.new(frame_shots) # 10フレーム目
       end
-      @frames << Frame.new(frame_shots) if shots.length - 1 == i # 10フレーム目
     end
   end
 
@@ -61,16 +65,16 @@ class Game
   end
 
   def sum_additional_marks
-    @frames.each_with_index do |frame,i|
-      if i < 9 
-        case frame.score_type
-        when :strike
-          @total_marks += @frames[i + 1].score_2shots
-          # 9フレームにストライクで、10フレームでストライクを取っても次のフレームには移動しない
-          @total_marks += @frames[i + 2].score_1shot if @frames[i + 1].score_type == :strike && i < 8
-        when :spare
-          @total_marks += @frames[i + 1].score_1shot
-        end
+    @frames.each_with_index do |frame, i|
+      next if i > 8
+
+      case frame.score_type
+      when :strike
+        @total_marks += @frames[i + 1].score_2shots
+        # 9フレームにストライクで、10フレームでストライクを取っても次のフレームには移動しない
+        @total_marks += @frames[i + 2].score_1shot if @frames[i + 1].score_type == :strike && i < 8
+      when :spare
+        @total_marks += @frames[i + 1].score_1shot
       end
     end
   end
@@ -83,12 +87,12 @@ class Game
 end
 
 def calculate_score(input)
-  Game.new( input.map { |shot| Shot.new(shot) } ).game_score
+  Game.new(input.map { |shot| Shot.new(shot) }).game_score
 end
 
 def main
   scores = ARGV[0].split(',')
-  puts calculate_score(scores)
+  calculate_score(scores)
 end
 
-#main
+main
