@@ -8,9 +8,7 @@ class Game
   end
 
   def sum_down_marks
-    @frames.each do |frame|
-      @total_marks += frame.score
-    end
+    @total_marks = @frames.sum { |frame| frame.score}
   end
 
   def sum_additional_marks
