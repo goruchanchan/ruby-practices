@@ -16,7 +16,7 @@ class Frame
     @second_shot.nil? ? score_1shot : score_1shot + @second_shot.score
   end
 
-  def score_frame
+  def score
     @third_shot.nil? ? score_2shots : score_2shots + @third_shot.score
   end
 

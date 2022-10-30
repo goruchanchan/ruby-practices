@@ -25,7 +25,7 @@ class Game
 
   def sum_down_marks
     @frames.each do |frame|
-      @total_marks += frame.score_frame
+      @total_marks += frame.score
     end
   end
 
