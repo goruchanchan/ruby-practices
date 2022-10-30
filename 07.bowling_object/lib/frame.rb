@@ -3,9 +3,7 @@
 
 class Frame
   def initialize(frame_shots)
-    @first_shot  = frame_shots[0]
-    @second_shot = frame_shots[1] unless frame_shots[1].nil?
-    @third_shot  = frame_shots[2] unless frame_shots[2].nil?
+    @first_shot, @second_shot, @third_shot = frame_shots
   end
 
   def score_1shot
