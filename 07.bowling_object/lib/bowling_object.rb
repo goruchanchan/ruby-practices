@@ -8,17 +8,14 @@ require_relative 'game'
 def consist_frames(shots)
   frame_shots = []
   frames = []
-  shots.each_with_index do |shot, i|
+  shots.each do |shot|
     frame_shots << shot
-    if frames.size < 9 # 〜9フレーム目
-      if (frame_shots.size % 2).zero? || shot.score == 10
-        frames << Frame.new(frame_shots)
-        frame_shots.clear
-      end
-    elsif shots.length - 1 == i # 10フレーム目
+    if ((frame_shots.size % 2).zero? || shot.score == 10) && frames.size < 9 # 〜9フレーム目
       frames << Frame.new(frame_shots)
+      frame_shots.clear
     end
   end
+  frames << Frame.new(frame_shots) # 10フレーム目
   frames
 end
 
