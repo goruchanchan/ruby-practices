@@ -13,7 +13,6 @@
 /test/tmp/
 /test/version_tmp/
 /tmp/
-07.bowling_object/test
 
 # Used by dotenv library to load environment variables.
 # .env
