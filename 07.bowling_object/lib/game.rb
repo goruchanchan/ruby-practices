@@ -2,25 +2,9 @@
 # frozen_string_literal: true
 
 class Game
-  def initialize(shots)
+  def initialize(frames)
     @total_marks = 0
-    @frames = []
-    consist_game(shots)
-  end
-
-  def consist_game(shots)
-    frame_shots = []
-    shots.each_with_index do |shot, i|
-      frame_shots << shot
-      if @frames.size < 9 # 〜9フレーム目
-        if (frame_shots.size % 2).zero? || shot.score == 10
-          @frames << Frame.new(frame_shots)
-          frame_shots.clear
-        end
-      elsif shots.length - 1 == i # 10フレーム目
-        @frames << Frame.new(frame_shots)
-      end
-    end
+    @frames = frames
   end
 
   def sum_down_marks
@@ -44,7 +28,7 @@ class Game
     end
   end
 
-  def game_score
+  def score
     sum_down_marks
     sum_additional_marks
     @total_marks

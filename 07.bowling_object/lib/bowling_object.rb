@@ -5,13 +5,32 @@ require_relative 'shot'
 require_relative 'frame'
 require_relative 'game'
 
-def calculate_score(input)
-  Game.new(input.map { |shot| Shot.new(shot) }).game_score
+def consist_frames(shots)
+  frame_shots = []
+  frames = []
+  shots.each_with_index do |shot, i|
+    frame_shots << shot
+    if frames.size < 9 # 〜9フレーム目
+      if (frame_shots.size % 2).zero? || shot.score == 10
+        frames << Frame.new(frame_shots)
+        frame_shots.clear
+      end
+    elsif shots.length - 1 == i # 10フレーム目
+      frames << Frame.new(frame_shots)
+    end
+  end
+  frames
 end
 
-def main
-  scores = ARGV[0].split(',')
-  puts calculate_score(scores)
+def calculate_game(frames)
+  Game.new(frames)
 end
 
-main
+def main(shots = nil)
+  shots = ARGV[0].split(',') if shots.nil?
+  frames = consist_frames(shots.map { |shot| Shot.new(shot) })
+  game = calculate_game(frames)
+  game.score
+end
+
+puts main
