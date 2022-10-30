@@ -7,7 +7,7 @@ class Game
   end
 
   def sum_down_marks
-    @frames.sum { |frame| frame.score}
+    @frames.sum(&:score)
   end
 
   def sum_additional_marks
