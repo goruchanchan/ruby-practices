@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require_relative "../../lib/bowling_object"
+require_relative "../lib/bowling_object"
 
 class TestTest < Test::Unit::TestCase
   def test_bowling

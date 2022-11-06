@@ -30,4 +30,4 @@ def main(shots = nil)
   game.score
 end
 
-puts main
+#puts main
