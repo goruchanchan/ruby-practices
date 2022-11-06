@@ -11,16 +11,14 @@ class Game
   end
 
   def sum_additional_marks
-    @frames.each_with_index.sum do |frame, i|
-      next 0 if i > @frames.length - 2 # 10フレームでは追加点計算をしない
-      case frame.score_type
-      when :strike
+    9.times.sum do |i|
+      if @frames[i].score_type == :strike
         if @frames[i + 1].score_type == :strike && i < @frames.length - 2# 9フレームにストライクで、10フレームでストライクを取っても次のフレームには移動しないので条件付け
           @frames[i + 1].score_2shots + @frames[i + 2].score_1shot
         else
           @frames[i + 1].score_2shots
         end
-      when :spare
+      elsif @frames[i].score_type == :spare
         @frames[i + 1].score_1shot
       else
         0
