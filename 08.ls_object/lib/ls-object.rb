@@ -233,5 +233,3 @@ def parsing_permission(file_mode)
   other_permission = file_mode % 8
   "#{PERMISSION_ARRAY[owener_permission]}#{PERMISSION_ARRAY[group_permission]}#{PERMISSION_ARRAY[other_permission]}"
 end
-
-main
