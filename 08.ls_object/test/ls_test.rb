@@ -1,16 +1,24 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
-require_relative '../lib/ls-object'
+require_relative '../lib/ls'
 
 class LsCommandTest < Minitest::Test
-  def test_ls
+  def test_not_exist
     expected = <<~TEXT.chomp
-    Gemfile       bin           lib
-    Gemfile.lock  doc           test
+      ls: foo: No such file or directory
+      ls: hoge: No such file or directory
     TEXT
-    assert_equal expected, main
+    assert_equal expected, error_message(["foo", "hoge"])
   end
+
+  # def test_ls
+  #   expected = <<~TEXT.chomp
+  #     Gemfile       bin           lib
+  #     Gemfile.lock  doc           test
+  #   TEXT
+  #   assert_equal expected, print_directories({:path=>".", :file_list=>["Gemfile", "Gemfile.lock", "bin", "doc", "lib", "test"]}, {:file=>[], :directory=>["."], :error=>[], :option=>[]})
+  # end
 
   # def test_ls_input_path
   #   expected = <<~TEXT

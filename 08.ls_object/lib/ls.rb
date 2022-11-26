@@ -12,20 +12,70 @@ PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].free
 
 MAX_COLUMN = 3
 
-def search_max_char_length(categorize_list)
-  if !categorize_list[:file].empty? || !categorize_list[:directory].empty?
-    all_file_list = categorize_list[:file] + retrieve_file_list(categorize_list[:directory], categorize_list[:option])
-    padding_num = all_file_list.max_by(&:length).length + 1
+def argument_parsing
+  raw_argument = []
+  ARGV.each do |argument|
+    break unless argument.include?('-')
+
+    raw_argument.push(argument)
   end
-  padding_num
+
+  options = []
+  raw_argument.each do |option|
+    options.push('-a') if option.include?('a')
+    options.push('-r') if option.include?('r')
+    options.push('-l') if option.include?('l')
+  end
+
+  { argument: raw_argument, argument_option: options }
 end
 
-def retrieve_hash_list(search_paths, options)
-  if options.include?('-a')
-    # "".."を入れる方法がわからなかったので、ここで入れる。並び替えがずれるので、入れた後にもソートする
-    search_paths.map { |path| { path: path, file_list: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort_by(&:to_s) } }
+def argv_parsing
+  file_paths = []
+  directory_paths = []
+  error_paths = []
+
+  argument = argument_parsing
+
+  (ARGV - argument[:argument]).each do |path|
+    if FileTest.directory?(path)
+      directory_paths.push(path)
+    elsif FileTest.file?(path)
+      file_paths.push(path)
+    else
+      error_paths.push(path)
+    end
+  end
+
+  directory_paths.push('.') if file_paths.empty? && directory_paths.empty? && error_paths.empty?
+
+  { file: file_paths.sort, directory: directory_paths.sort, error: error_paths.sort, option: argument[:argument_option].sort }
+end
+
+def print_files(file_list, option_list, padding)
+  if option_list.include?('-l')
+    file_list = convert_list_segment(file_list, '.')
+    padding_list = (0..6).map { |n| Matrix.columns(file_list).row(n).max.to_s.length }
+    print_list_segment(file_list, padding_list)
   else
-    search_paths.map { |path| { path: path, file_list: Dir.glob('*', base: path) } }
+    file_list = convert_array_for_print(file_list)
+    print_file_list(file_list, padding)
+  end
+end
+
+def print_directories(directory_file_list, option_list, padding)
+  if option_list.include?('-l')
+    directory_file_list.each_with_index do |list, i|
+      block_size = calculate_block_size(list[:file_list], list[:path])
+      list[:file_list] = convert_list_segment(list[:file_list], list[:path])
+      padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
+      puts "#{list[:path]}:" if directory_file_list.size > 1
+      print_hash_segment(list, block_size, padding_list)
+      puts if i < directory_file_list.length - 1
+    end
+  else
+    directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
+    print_hash_list(directory_file_list, padding)
   end
 end
 
@@ -35,23 +85,6 @@ def retrieve_file_list(search_paths, options)
     search_paths.flat_map { |path| Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') }
   else
     search_paths.flat_map { |path| Dir.glob('*', base: path) }
-  end
-end
-
-def parsing_reverse_file_list(file_list, options)
-  if options.include?('-r')
-    file_list.reverse
-  else
-    file_list
-  end
-end
-
-def parsing_reverse_hash_list(hash_list, options)
-  if options.include?('-r')
-    # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
-    hash_list.reverse.map { |hash| { path: hash[:path], file_list: hash[:file_list].sort_by(&:to_s).reverse } }
-  else
-    hash_list
   end
 end
 
@@ -72,12 +105,51 @@ def convert_array_for_print(lists)
   transpose_paths.transpose
 end
 
+def error_message(error_list)
+  error_list.map { |error_path| "ls: #{error_path}: No such file or directory" }.join("\n") unless error_list.empty?
+end
+
+def print_hash_list(input_hash_list, padding_num)
+  input_hash_list.each_with_index do |file_list, i|
+    puts "#{file_list[:path]}:" if input_hash_list.size > 1
+    print_file_list(file_list[:file_list], padding_num)
+    puts if i < input_hash_list.length - 1
+  end
+end
+
+def print_file_list(input_file_list, padding_num)
+  input_file_list.each do |file_column|
+    file_column.each { |file_name| print file_name.to_s.ljust(padding_num + 1) }
+    puts
+  end
+end
+
 def convert_list_segment(file_list, path)
   file_list.map { |file| construct_list_segment(file, path) }
 end
 
 def calculate_block_size(file_list, path)
   file_list.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
+end
+
+def print_hash_segment(hash_list, block_size, padding_list)
+  puts "total #{block_size}"
+  print_list_segment(hash_list[:file_list], padding_list)
+end
+
+def print_list_segment(lists, padding_list)
+  lists.each do |list|
+    list.each_with_index do |file, i|
+      if i < 5
+        print "#{file.to_s.rjust(padding_list[i])} "
+        # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
+        print ' ' if i > 1 && i < 4
+      else
+        print "#{file} "
+      end
+    end
+    puts
+  end
 end
 
 def construct_list_segment(file_name, path)
