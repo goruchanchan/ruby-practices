@@ -54,7 +54,7 @@ unless file_list.empty?
 
   file_list = file_list.reverse if option_list.include?('-r')
 
-  print_files(file_list, option_list, padding)
+  puts ls_files(file_list, option_list, padding)
 end
 
 unless directory_list.empty?

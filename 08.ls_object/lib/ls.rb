@@ -52,14 +52,44 @@ def argv_parsing
   { file: file_paths.sort, directory: directory_paths.sort, error: error_paths.sort, option: argument[:argument_option].sort }
 end
 
-def print_files(file_list, option_list, padding)
+def ls_files(file_list, option_list, padding)
   if option_list.include?('-l')
     file_list = convert_list_segment(file_list, '.')
     padding_list = (0..6).map { |n| Matrix.columns(file_list).row(n).max.to_s.length }
-    print_list_segment(file_list, padding_list)
+    print_list_segment2(file_list, padding_list)
   else
     file_list = convert_array_for_print(file_list)
-    print_file_list(file_list, padding)
+    file_message(file_list, padding)
+  end
+end
+
+def file_message(input_file_list, padding_num)
+  input_file_list.map do |column|
+    column.map.with_index do |file_name, i|
+      column[i + 1].nil? ? file_name.to_s : file_name.to_s.ljust(padding_num + 1)
+    end.join
+  end.join("\n")
+end
+
+def print_file_list(input_file_list, padding_num)
+  input_file_list.each do |file_column|
+    file_column.each { |file_name| print file_name.to_s.ljust(padding_num + 1) }
+    puts
+  end
+end
+
+def print_list_segment2(lists, padding_list)
+  lists.each do |list|
+    list.each_with_index do |file, i|
+      if i < 5
+        print "#{file.to_s.rjust(padding_list[i])} "
+        # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
+        print ' ' if i > 1 && i < 4
+      else
+        print "#{file} "
+      end
+    end
+    puts
   end
 end
 
@@ -114,13 +144,6 @@ def print_hash_list(input_hash_list, padding_num)
     puts "#{file_list[:path]}:" if input_hash_list.size > 1
     print_file_list(file_list[:file_list], padding_num)
     puts if i < input_hash_list.length - 1
-  end
-end
-
-def print_file_list(input_file_list, padding_num)
-  input_file_list.each do |file_column|
-    file_column.each { |file_name| print file_name.to_s.ljust(padding_num + 1) }
-    puts
   end
 end
 

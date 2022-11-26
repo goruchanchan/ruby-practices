@@ -9,7 +9,14 @@ class LsCommandTest < Minitest::Test
       ls: foo: No such file or directory
       ls: hoge: No such file or directory
     TEXT
-    assert_equal expected, error_message(["foo", "hoge"])
+    assert_equal expected, error_message(%w[foo hoge])
+  end
+
+  def test_file_no_argument
+    expected = <<~TEXT.chomp
+      Gemfile       Gemfile.lock
+    TEXT
+    assert_equal expected, ls_files(%w[Gemfile Gemfile.lock], %w[], 13)
   end
 
   # def test_ls
