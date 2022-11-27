@@ -60,7 +60,7 @@ def ls_files(file_list, option_list, padding)
     padding_list = (0..6).map { |n| Matrix.columns(long_file_list).row(n).max.to_s.length }
     file_long_message(long_file_list, padding_list)
   else
-    file_list = convert_array_for_print(file_list)
+    file_list = convert_array(file_list)
     file_message(file_list, padding)
   end
 end
@@ -80,33 +80,10 @@ def file_long_message(file_lists, padding_list)
         element.dup
       else
         # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
-        %w[2 3].include?(i.to_s) ? element.to_s.ljust(padding_list[i]).to_s.concat('  ') : element.to_s.ljust(padding_list[i]).to_s.concat(' ')
+        %w[2 3].include?(i.to_s) ? element.to_s.ljust(padding_list[i]).to_s.concat('  ') : element.to_s.rjust(padding_list[i]).to_s.concat(' ')
       end
     end.join
   end.join("\n")
-end
-
-def print_file_list(input_file_list, padding_num)
-  input_file_list.each do |file_column|
-    file_column.each { |file_name| print file_name.to_s.ljust(padding_num + 1) }
-    puts
-  end
-end
-
-def print_directories(directory_file_list, option_list, padding)
-  if option_list.include?('-l')
-    directory_file_list.each_with_index do |list, i|
-      block_size = calculate_block_size(list[:file_list], list[:path])
-      list[:file_list] = convert_list_segment(list[:file_list], list[:path])
-      padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
-      puts "#{list[:path]}:" if directory_file_list.size > 1
-      print_hash_segment(list, block_size, padding_list)
-      puts if i < directory_file_list.length - 1
-    end
-  else
-    directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
-    print_hash_list(directory_file_list, padding)
-  end
 end
 
 def retrieve_hash_list(search_paths, options)
@@ -118,58 +95,47 @@ def retrieve_hash_list(search_paths, options)
   end
 end
 
-def parsing_reverse_hash_list(hash_list, options)
+def parsing_reverse_hash_list(hash_list)
   # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
   hash_list.reverse.map { |hash| { path: hash[:path], file_list: hash[:file_list].sort_by(&:to_s).reverse } }
 end
 
 def ls_directories(directory_list, option_list, padding)
   directory_file_list = retrieve_hash_list(directory_list, option_list)
-  directory_file_list = parsing_reverse_hash_list(directory_file_list, option_list) if option_list.include?('-r')
+  directory_file_list = parsing_reverse_hash_list(directory_file_list) if option_list.include?('-r')
 
   if option_list.include?('-l')
-    directory_file_list.each_with_index do |list, i|
-      block_size = calculate_block_size(list[:file_list], list[:path])
-      list[:file_list] = convert_list_segment(list[:file_list], list[:path])
-      padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
-      puts "#{list[:path]}:" if directory_file_list.size > 1
-      print_hash_segment(list, block_size, padding_list)
-      puts if i < directory_file_list.length - 1
-    end
+    direcoty_long_message(directory_file_list)
   else
-    directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
+    directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array list[:file_list] }
     direcoty_message(directory_file_list, padding)
-  end
-end
-
-def print_hash_list(input_hash_list, padding_num)
-  input_hash_list.each_with_index do |file_list, i|
-    puts "#{file_list[:path]}:" if input_hash_list.size > 1
-    print_file_list(file_list[:file_list], padding_num)
-    puts if i < input_hash_list.length - 1
   end
 end
 
 def direcoty_message(input_hash_list, padding_num)
   input_hash_list.map do |file_list|
-    if input_hash_list.size > 1
-      "#{file_list[:path]}:\n" + file_message(file_list[:file_list], padding_num + 2)
-    else
-      file_message(file_list[:file_list], padding_num + 2)
-    end.concat("\n")
+    "#{arrange_directory_name(input_hash_list, file_list[:path])}#{file_message(file_list[:file_list], padding_num + 2)}".concat("\n")
   end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
 end
 
-def retrieve_file_list(search_paths, options)
-  if options.include?('-a')
-    # "".."を入れる方法がわからなかったので、ここで入れる。文字最大長を知りたいだけなのでソート不要
-    search_paths.flat_map { |path| Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') }
-  else
-    search_paths.flat_map { |path| Dir.glob('*', base: path) }
-  end
+def direcoty_long_message(directory_file_list)
+  directory_file_list.map do |list|
+    block_size = calculate_block_size(list[:file_list], list[:path])
+    list[:file_list] = convert_list_segment(list[:file_list], list[:path])
+    padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
+    "#{arrange_directory_name(directory_file_list, list[:path])}total #{block_size}\n#{file_long_message(list[:file_list], padding_list)}\n"
+  end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
 end
 
-def convert_array_for_print(lists)
+def calculate_block_size(file_list, path)
+  file_list.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
+end
+
+def arrange_directory_name(directory_list, directory_path)
+  "#{directory_path}:\n" if directory_list.size > 1
+end
+
+def convert_array(lists)
   if lists.length % MAX_COLUMN != 0
     # 行列変換させるために足りない要素にnilをつめていく
     start_fill_nil = lists.length + 1
@@ -192,30 +158,6 @@ end
 
 def convert_list_segment(file_list, path)
   file_list.map { |file| construct_list_segment(file, path) }
-end
-
-def calculate_block_size(file_list, path)
-  file_list.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
-end
-
-def print_hash_segment(hash_list, block_size, padding_list)
-  puts "total #{block_size}"
-  print_list_segment(hash_list[:file_list], padding_list)
-end
-
-def print_list_segment(lists, padding_list)
-  lists.each do |list|
-    list.each_with_index do |file, i|
-      if i < 5
-        print "#{file.to_s.rjust(padding_list[i])} "
-        # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
-        print ' ' if i > 1 && i < 4
-      else
-        print "#{file} "
-      end
-    end
-    puts
-  end
 end
 
 def construct_list_segment(file_name, path)

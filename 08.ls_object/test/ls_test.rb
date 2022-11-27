@@ -58,6 +58,19 @@ class LsCommandTest < Minitest::Test
     assert_equal expected, ls_directories(%w[.], %w[-r], 13)
   end
 
+  def test_directory_l_option
+    expected = <<~TEXT.chomp
+      total 16
+      -rw-r--r--  1 ryo  staff  141 11 25 23:38 Gemfile
+      -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
+      drwxr-xr-x  3 ryo  staff   96 11 25 22:37 bin
+      drwxr-xr-x  3 ryo  staff   96 11 25 21:52 doc
+      drwxr-xr-x  5 ryo  staff  160 11 26 16:24 lib
+      drwxr-xr-x  4 ryo  staff  128 11 25 23:38 test
+    TEXT
+    assert_equal expected, ls_directories(%w[.], %w[-l], 13)
+  end
+
   # def test_ls
   #   expected = <<~TEXT.chomp
   #     Gemfile       bin           lib
