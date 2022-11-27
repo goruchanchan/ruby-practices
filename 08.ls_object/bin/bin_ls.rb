@@ -6,24 +6,6 @@ require_relative '../lib/ls'
 # オプションの指定はコマンド直後にしたいので環境変数を設定しておく
 ENV['POSIXLY_CORRECT'] = '1'
 
-def retrieve_hash_list(search_paths, options)
-  if options.include?('-a')
-    # "".."を入れる方法がわからなかったので、ここで入れる。並び替えがずれるので、入れた後にもソートする
-    search_paths.map { |path| { path: path, file_list: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort_by(&:to_s) } }
-  else
-    search_paths.map { |path| { path: path, file_list: Dir.glob('*', base: path) } }
-  end
-end
-
-def parsing_reverse_hash_list(hash_list, options)
-  if options.include?('-r')
-    # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
-    hash_list.reverse.map { |hash| { path: hash[:path], file_list: hash[:file_list].sort_by(&:to_s).reverse } }
-  else
-    hash_list
-  end
-end
-
 def max_char_length(file_list)
   file_list.empty? ? 0 : file_list.max_by(&:length).length + 1
 end
@@ -58,9 +40,7 @@ unless file_list.empty?
 end
 
 unless directory_list.empty?
-  puts unless file_list.empty?
+  puts unless file_list.empty? || error_list.empty?
 
-  directory_files = retrieve_hash_list(categorize_input_list[:directory], option_list)
-  directory_files = parsing_reverse_hash_list(directory_files, option_list)
-  print_directories(directory_files, option_list, padding)
+  puts ls_directories(directory_list, option_list, padding)
 end

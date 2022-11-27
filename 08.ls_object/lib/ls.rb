@@ -107,6 +107,57 @@ def print_directories(directory_file_list, option_list, padding)
   end
 end
 
+def retrieve_hash_list(search_paths, options)
+  if options.include?('-a')
+    # "".."を入れる方法がわからなかったので、ここで入れる。並び替えがずれるので、入れた後にもソートする
+    search_paths.map { |path| { path: path, file_list: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort_by(&:to_s) } }
+  else
+    search_paths.map { |path| { path: path, file_list: Dir.glob('*', base: path) } }
+  end
+end
+
+def parsing_reverse_hash_list(hash_list, options)
+  # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
+  hash_list.reverse.map { |hash| { path: hash[:path], file_list: hash[:file_list].sort_by(&:to_s).reverse } }
+end
+
+def ls_directories(directory_list, option_list, padding)
+  directory_file_list = retrieve_hash_list(directory_list, option_list)
+  directory_file_list = parsing_reverse_hash_list(directory_file_list, option_list) if option_list.include?('-r')
+
+  if option_list.include?('-l')
+    directory_file_list.each_with_index do |list, i|
+      block_size = calculate_block_size(list[:file_list], list[:path])
+      list[:file_list] = convert_list_segment(list[:file_list], list[:path])
+      padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
+      puts "#{list[:path]}:" if directory_file_list.size > 1
+      print_hash_segment(list, block_size, padding_list)
+      puts if i < directory_file_list.length - 1
+    end
+  else
+    directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array_for_print list[:file_list] }
+    direcoty_message(directory_file_list, padding)
+  end
+end
+
+def print_hash_list(input_hash_list, padding_num)
+  input_hash_list.each_with_index do |file_list, i|
+    puts "#{file_list[:path]}:" if input_hash_list.size > 1
+    print_file_list(file_list[:file_list], padding_num)
+    puts if i < input_hash_list.length - 1
+  end
+end
+
+def direcoty_message(input_hash_list, padding_num)
+  input_hash_list.map do |file_list|
+    if input_hash_list.size > 1
+      "#{file_list[:path]}:\n" + file_message(file_list[:file_list], padding_num + 2)
+    else
+      file_message(file_list[:file_list], padding_num + 2)
+    end.concat("\n")
+  end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
+end
+
 def retrieve_file_list(search_paths, options)
   if options.include?('-a')
     # "".."を入れる方法がわからなかったので、ここで入れる。文字最大長を知りたいだけなのでソート不要
@@ -135,14 +186,6 @@ end
 
 def error_message(error_list)
   error_list.map { |error_path| "ls: #{error_path}: No such file or directory" }.join("\n") unless error_list.empty?
-end
-
-def print_hash_list(input_hash_list, padding_num)
-  input_hash_list.each_with_index do |file_list, i|
-    puts "#{file_list[:path]}:" if input_hash_list.size > 1
-    print_file_list(file_list[:file_list], padding_num)
-    puts if i < input_hash_list.length - 1
-  end
 end
 
 def convert_list_segment(file_list, path)

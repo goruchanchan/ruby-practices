@@ -27,6 +27,14 @@ class LsCommandTest < Minitest::Test
     assert_equal expected, ls_files(%w[Gemfile Gemfile.lock], %w[-l], 13)
   end
 
+  def test_directory_no_option
+    expected = <<~TEXT.chomp
+      Gemfile         bin             lib
+      Gemfile.lock    doc             test
+    TEXT
+    assert_equal expected, ls_directories(%w[.], %w[], 13)
+  end
+
   # def test_ls
   #   expected = <<~TEXT.chomp
   #     Gemfile       bin           lib
