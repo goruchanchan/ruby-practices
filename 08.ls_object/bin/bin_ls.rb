@@ -34,8 +34,6 @@ padding = max_char_length(all_file_list)
 unless file_list.empty?
   puts unless error_list.empty?
 
-  file_list = file_list.reverse if option_list.include?('-r')
-
   puts ls_files(file_list, option_list, padding)
 end
 

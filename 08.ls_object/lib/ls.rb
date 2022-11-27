@@ -53,6 +53,8 @@ def argv_parsing
 end
 
 def ls_files(file_list, option_list, padding)
+  file_list = file_list.reverse if option_list.include?('-r')
+
   if option_list.include?('-l')
     long_file_list = convert_list_segment(file_list, '.')
     padding_list = (0..6).map { |n| Matrix.columns(long_file_list).row(n).max.to_s.length }
