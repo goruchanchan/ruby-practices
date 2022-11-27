@@ -12,11 +12,19 @@ class LsCommandTest < Minitest::Test
     assert_equal expected, error_message(%w[foo hoge])
   end
 
-  def test_file_no_argument
+  def test_file_no_option
     expected = <<~TEXT.chomp
       Gemfile       Gemfile.lock
     TEXT
     assert_equal expected, ls_files(%w[Gemfile Gemfile.lock], %w[], 13)
+  end
+
+  def test_file_long_option
+    expected = <<~TEXT.chomp
+      -rw-r--r--  1 ryo  staff  141 11 25 23:38 Gemfile
+      -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
+    TEXT
+    assert_equal expected, ls_files(%w[Gemfile Gemfile.lock], %w[-l], 13)
   end
 
   # def test_ls

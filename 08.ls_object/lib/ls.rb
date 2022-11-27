@@ -54,9 +54,9 @@ end
 
 def ls_files(file_list, option_list, padding)
   if option_list.include?('-l')
-    file_list = convert_list_segment(file_list, '.')
-    padding_list = (0..6).map { |n| Matrix.columns(file_list).row(n).max.to_s.length }
-    print_list_segment2(file_list, padding_list)
+    long_file_list = convert_list_segment(file_list, '.')
+    padding_list = (0..6).map { |n| Matrix.columns(long_file_list).row(n).max.to_s.length }
+    file_long_message(long_file_list, padding_list)
   else
     file_list = convert_array_for_print(file_list)
     file_message(file_list, padding)
@@ -71,24 +71,22 @@ def file_message(input_file_list, padding_num)
   end.join("\n")
 end
 
+def file_long_message(file_lists, padding_list)
+  file_lists.map do |file_long_format|
+    file_long_format.map.each_with_index do |element, i|
+      if i == file_long_format.size - 1
+        element.dup
+      else
+        # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
+        %w[2 3].include?(i.to_s) ? element.to_s.ljust(padding_list[i]).to_s.concat('  ') : element.to_s.ljust(padding_list[i]).to_s.concat(' ')
+      end
+    end.join
+  end.join("\n")
+end
+
 def print_file_list(input_file_list, padding_num)
   input_file_list.each do |file_column|
     file_column.each { |file_name| print file_name.to_s.ljust(padding_num + 1) }
-    puts
-  end
-end
-
-def print_list_segment2(lists, padding_list)
-  lists.each do |list|
-    list.each_with_index do |file, i|
-      if i < 5
-        print "#{file.to_s.rjust(padding_list[i])} "
-        # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
-        print ' ' if i > 1 && i < 4
-      else
-        print "#{file} "
-      end
-    end
     puts
   end
 end
