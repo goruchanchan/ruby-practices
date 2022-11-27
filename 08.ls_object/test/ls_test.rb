@@ -26,12 +26,20 @@ class LsCommandTest < Minitest::Test
     assert_equal expected, ls_files(%w[Gemfile Gemfile.lock], %w[-r], 13)
   end
 
-  def test_file_long_option
+  def test_file_l_option
     expected = <<~TEXT.chomp
       -rw-r--r--  1 ryo  staff  141 11 25 23:38 Gemfile
       -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
     TEXT
     assert_equal expected, ls_files(%w[Gemfile Gemfile.lock], %w[-l], 13)
+  end
+
+  def test_file_rl_option
+    expected = <<~TEXT.chomp
+      -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
+      -rw-r--r--  1 ryo  staff  141 11 25 23:38 Gemfile
+    TEXT
+    assert_equal expected, ls_files(%w[Gemfile Gemfile.lock], %w[-l -r], 13)
   end
 
   def test_directory_no_option
