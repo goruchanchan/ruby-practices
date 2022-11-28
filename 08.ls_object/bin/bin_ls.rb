@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative '../lib/ls'
+require_relative '../lib/argv_parser'
+require_relative '../lib/file'
+require_relative '../lib/directory'
 
 # オプションの指定はコマンド直後にしたいので環境変数を設定しておく
 ENV['POSIXLY_CORRECT'] = '1'
