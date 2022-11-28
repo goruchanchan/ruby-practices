@@ -8,11 +8,11 @@ class LsFile
     file_list = file_list.reverse if option_list.include?('-r')
 
     if option_list.include?('-l')
-      long_file_list = convert_list_segment(file_list, '.')
+      long_file_list = Formatter.convert_list_segment(file_list, '.')
       padding_list = (0..6).map { |n| Matrix.columns(long_file_list).row(n).max.to_s.length }
       file_long_message(long_file_list, padding_list)
     else
-      file_list = convert_array(file_list)
+      file_list = Formatter.convert_array(file_list)
       file_message(file_list, padding)
     end
   end

@@ -26,7 +26,7 @@ class LsDirectory < LsFile
   def self.direcoty_long_message(directory_file_list)
     directory_file_list.map do |list|
       block_size = calculate_block_size(list[:file_list], list[:path])
-      list[:file_list] = convert_list_segment(list[:file_list], list[:path])
+      list[:file_list] = Formatter.convert_list_segment(list[:file_list], list[:path])
       padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
       "#{arrange_directory_name(directory_file_list, list[:path])}total #{block_size}\n#{file_long_message(list[:file_list], padding_list)}\n"
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
