@@ -4,22 +4,22 @@
 require_relative 'formatter'
 require_relative 'ls_file'
 
-class LsDirectory < LsFile
-  def self.ls_directories(directory_list, option_list, padding)
+class LsDirectory
+  def self.ls(directory_list, option_list, padding)
     directory_file_list = retrieve_hash_list(directory_list, option_list)
     directory_file_list = parsing_reverse_hash_list(directory_file_list) if option_list.include?('-r')
 
     if option_list.include?('-l')
       direcoty_long_message(directory_file_list)
     else
-      directory_file_list = directory_file_list.each { |list| list[:file_list] = convert_array list[:file_list] }
+      directory_file_list = directory_file_list.each { |list| list[:file_list] = Formatter.convert_array list[:file_list] }
       direcoty_message(directory_file_list, padding)
     end
   end
 
   def self.direcoty_message(input_hash_list, padding_num)
     input_hash_list.map do |file_list|
-      "#{arrange_directory_name(input_hash_list, file_list[:path])}#{file_message(file_list[:file_list], padding_num + 2)}".concat("\n")
+      "#{arrange_directory_name(input_hash_list, file_list[:path])}#{LsFile.file_message(file_list[:file_list], padding_num + 2)}".concat("\n")
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
   end
 
@@ -28,7 +28,7 @@ class LsDirectory < LsFile
       block_size = calculate_block_size(list[:file_list], list[:path])
       list[:file_list] = Formatter.convert_list_segment(list[:file_list], list[:path])
       padding_list = (0..6).map { |n| Matrix.columns(list[:file_list]).row(n).max.to_s.length }
-      "#{arrange_directory_name(directory_file_list, list[:path])}total #{block_size}\n#{file_long_message(list[:file_list], padding_list)}\n"
+      "#{arrange_directory_name(directory_file_list, list[:path])}total #{block_size}\n#{LsFile.file_long_message(list[:file_list], padding_list)}\n"
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
   end
 

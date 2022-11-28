@@ -4,7 +4,7 @@
 require_relative 'formatter'
 
 class LsFile
-  def self.ls_files(file_list, option_list, padding)
+  def self.ls(file_list, option_list, padding)
     file_list = file_list.reverse if option_list.include?('-r')
 
     if option_list.include?('-l')

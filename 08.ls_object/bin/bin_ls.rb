@@ -15,11 +15,11 @@ puts LsFile.error_message(all_data.error_list) unless all_data.error_list.empty?
 
 unless all_data.file_list.empty?
   puts unless all_data.error_list.empty?
-  puts LsFile.ls_files(all_data.file_list, all_data.option_list, all_data.max_char_length)
+  puts LsFile.ls(all_data.file_list, all_data.option_list, all_data.max_char_length)
 end
 
 unless all_data.directory_list.empty?
   puts unless all_data.file_list.empty? || all_data.error_list.empty?
 
-  puts LsDirectory.ls_directories(all_data.directory_list, all_data.option_list, all_data.max_char_length)
+  puts LsDirectory.ls(all_data.directory_list, all_data.option_list, all_data.max_char_length)
 end
