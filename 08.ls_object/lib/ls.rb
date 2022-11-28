@@ -80,7 +80,7 @@ def file_long_message(file_lists, padding_list)
         element.dup
       else
         # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
-        %w[2 3].include?(i.to_s) ? element.to_s.ljust(padding_list[i]).to_s.concat('  ') : element.to_s.rjust(padding_list[i]).to_s.concat(' ')
+        %w[0 2 3].include?(i.to_s) ? element.to_s.ljust(padding_list[i]).to_s.concat('  ') : element.to_s.rjust(padding_list[i]).to_s.concat(' ')
       end
     end.join
   end.join("\n")
@@ -165,7 +165,7 @@ def construct_list_segment(file_name, path)
   full_file_name = "#{path}/#{file_name}"
   file_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
   list.push("#{replace_file_type(full_file_name)}#{parsing_permission(file_info.mode)}")
-  list.push(file_info.nlink.to_s.rjust(2), Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
+  list.push(file_info.nlink, Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
   month = file_info.mtime.to_a[4].to_s.rjust(2)
   day = file_info.mtime.to_a[3].to_s.rjust(2)
   clock = file_info.mtime.to_a[2].to_s.rjust(2, '0')
