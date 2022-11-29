@@ -28,17 +28,17 @@ class Formatter
   end
 
   def self.construct_list_segment(file_name, path)
-    list = []
     full_file_name = "#{path}/#{file_name}"
     file_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
-    list.push("#{replace_file_type(full_file_name)}#{parsing_permission(file_info.mode)}")
-    list.push(file_info.nlink, Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
     month = file_info.mtime.to_a[4].to_s.rjust(2)
     day = file_info.mtime.to_a[3].to_s.rjust(2)
     clock = file_info.mtime.to_a[2].to_s.rjust(2, '0')
     minitus = file_info.mtime.to_a[1].to_s.rjust(2, '0')
-    list.push("#{month} #{day} #{clock}:#{minitus}")
     file_name = "#{file_name} -> #{File.readlink(full_file_name)}" if file_info.symlink?
+    list = []
+    list.push("#{replace_file_type(full_file_name)}#{parsing_permission(file_info.mode)}")
+    list.push(file_info.nlink, Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
+    list.push("#{month} #{day} #{clock}:#{minitus}")
     list.push(file_name)
   end
 
