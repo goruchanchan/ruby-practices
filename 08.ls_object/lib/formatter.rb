@@ -1,16 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'optparse'
 require 'etc'
 require 'matrix'
 
-# 配列の順番と権限を組み合わせてみました
-PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
-
-MAX_COLUMN = 3
-
 class Formatter
+  PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
+  MAX_COLUMN = 3
+
   def self.convert_array(lists)
     if lists.length % MAX_COLUMN != 0
       # 行列変換させるために足りない要素にnilをつめていく

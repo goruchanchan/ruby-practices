@@ -29,7 +29,7 @@ class LsCommandTest < Minitest::Test
 
   def test_file_l_option
     expected = <<~TEXT.chomp
-      -rw-r--r--  1 ryo  staff  141 11 25 23:38 Gemfile
+      -rw-r--r--  1 ryo  staff  141 11 29 21:52 Gemfile
       -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
     TEXT
     assert_equal expected, LsFile.ls(%w[Gemfile Gemfile.lock], %w[-l], 13)
@@ -38,7 +38,7 @@ class LsCommandTest < Minitest::Test
   def test_file_rl_option
     expected = <<~TEXT.chomp
       -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
-      -rw-r--r--  1 ryo  staff  141 11 25 23:38 Gemfile
+      -rw-r--r--  1 ryo  staff  141 11 29 21:52 Gemfile
     TEXT
     assert_equal expected, LsFile.ls(%w[Gemfile Gemfile.lock], %w[-l -r], 13)
   end
