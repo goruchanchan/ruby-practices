@@ -37,7 +37,8 @@ class InputData
   end
 
   def max_char_length
-    (@file_list + retrieve_file_list(@directory_list)).empty? ? 0 : (@file_list + retrieve_file_list(@directory_list)).max_by(&:length).length + 1
+    all_file_name = @file_list + retrieve_file_list(@directory_list)
+    all_file_name.empty? ? 0 : all_file_name.max_by(&:length).length + 1
   end
 
   def retrieve_file_list(search_paths)
