@@ -4,10 +4,10 @@
 require_relative 'formatter'
 
 class LsFile
-  def self.ls(file_list, option_list, padding)
-    file_list = file_list.reverse if option_list.include?('-r')
+  def self.ls(file_list, option_hash_list, padding)
+    file_list = file_list.reverse if option_hash_list[:r]
 
-    if option_list.include?('-l')
+    if option_hash_list[:l]
       long_file_list = Formatter.convert_list_segment(file_list, '.')
       padding_list = (0..6).map { |n| Matrix.columns(long_file_list).row(n).max.to_s.length }
       file_long_message(long_file_list, padding_list)

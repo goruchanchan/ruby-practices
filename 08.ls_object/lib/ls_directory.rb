@@ -5,11 +5,11 @@ require_relative 'formatter'
 require_relative 'ls_file'
 
 class LsDirectory < LsFile
-  def self.ls(directory_list, option_list, padding)
-    directory_file_list = retrieve_hash_list(directory_list, option_list)
-    directory_file_list = parsing_reverse_hash_list(directory_file_list) if option_list.include?('-r')
+  def self.ls(directory_list, option_hash_list, padding)
+    directory_file_list = retrieve_hash_list(directory_list, option_hash_list)
+    directory_file_list = parsing_reverse_hash_list(directory_file_list) if option_hash_list[:r]
 
-    if option_list.include?('-l')
+    if option_hash_list[:l]
       direcoty_long_message(directory_file_list)
     else
       directory_file_list = directory_file_list.each { |list| list[:file_list] = Formatter.convert_array list[:file_list] }
@@ -40,8 +40,8 @@ class LsDirectory < LsFile
     "#{directory_path}:\n" if directory_list.size > 1
   end
 
-  def self.retrieve_hash_list(search_paths, options)
-    if options.include?('-a')
+  def self.retrieve_hash_list(search_paths, option_hash_list)
+    if option_hash_list[:a]
       # "".."を入れる方法がわからなかったので、ここで入れる。並び替えがずれるので、入れた後にもソートする
       search_paths.map { |path| { path: path, file_list: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort_by(&:to_s) } }
     else
