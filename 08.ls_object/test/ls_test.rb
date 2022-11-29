@@ -10,7 +10,7 @@ class LsCommandTest < Minitest::Test
       ls: foo: No such file or directory
       ls: hoge: No such file or directory
     TEXT
-    assert_equal expected, LsFile.error_message(%w[foo hoge])
+    assert_equal expected, LsFile.file_error(%w[foo hoge])
   end
 
   def test_file_no_option

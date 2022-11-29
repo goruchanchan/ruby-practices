@@ -17,7 +17,7 @@ class LsFile
     end
   end
 
-  def self.error_message(error_list)
+  def self.file_error(error_list)
     error_list.map { |error_path| "ls: #{error_path}: No such file or directory" }.join("\n") unless error_list.empty?
   end
 
