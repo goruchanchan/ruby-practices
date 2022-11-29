@@ -20,9 +20,7 @@ class Formatter
       column = (lists.length / MAX_COLUMN)
     end
 
-    transpose_paths = []
-    lists.each_slice(column) { |split_array| transpose_paths.push(split_array) }
-    transpose_paths.transpose
+    lists.each_slice(column).map { |split_array| split_array }.transpose
   end
 
   def self.convert_list_segment(file_list, path)
