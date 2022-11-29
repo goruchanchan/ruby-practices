@@ -45,16 +45,16 @@ class LsCommandTest < Minitest::Test
 
   def test_directory_no_option
     expected = <<~TEXT.chomp
-      Gemfile         bin             lib
-      Gemfile.lock    doc             test
+      Gemfile         bin             test
+      Gemfile.lock    lib
     TEXT
     assert_equal expected, LsDirectory.ls(%w[.], %w[], 13)
   end
 
   def test_directory_r_option
     expected = <<~TEXT.chomp
-      test            doc             Gemfile.lock
-      lib             bin             Gemfile
+      test            bin             Gemfile
+      lib             Gemfile.lock
     TEXT
     assert_equal expected, LsDirectory.ls(%w[.], %w[-r], 13)
   end
@@ -83,9 +83,9 @@ class LsCommandTest < Minitest::Test
 
   def test_directory_a_option
     expected = <<~TEXT.chomp
-      .               Gemfile         doc
-      ..              Gemfile.lock    lib
-      .rubocop.yml    bin             test
+      .               Gemfile         lib
+      ..              Gemfile.lock    test
+      .rubocop.yml    bin
     TEXT
     assert_equal expected, LsDirectory.ls(%w[.], %w[-a], 13)
   end

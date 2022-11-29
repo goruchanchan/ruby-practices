@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-class AllData
+class InputData
   attr_reader :error_list, :option_list, :file_list, :directory_list
 
   def initialize
