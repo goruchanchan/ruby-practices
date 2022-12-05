@@ -9,7 +9,7 @@ require_relative '../lib/ls_directory'
 ENV['POSIXLY_CORRECT'] = '1'
 
 input_data = InputData.new
-input_data.argv_parsing
+input_data.files_path
 
 unless input_data.files.empty?
   puts LsFile.ls(input_data.files, input_data.options, input_data.max_char_length)

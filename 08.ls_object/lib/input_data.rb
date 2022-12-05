@@ -12,7 +12,7 @@ class InputData
     @directories = []
   end
 
-  def argument_parsing
+  def file_path_parsing
     opt = OptionParser.new
     opt.on('-a') { |v| @options[:a] = v }
     opt.on('-r') { |v| @options[:r] = v }
@@ -21,8 +21,8 @@ class InputData
     ARGV
   end
 
-  def argv_parsing
-    argument_parsing.each do |path|
+  def files_path
+    file_path_parsing.each do |path|
       if FileTest.directory?(path)
         @directories.push(path)
       else
