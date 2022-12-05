@@ -11,12 +11,12 @@ ENV['POSIXLY_CORRECT'] = '1'
 input_data = InputData.new
 input_data.argv_parsing
 
-unless input_data.file_list.empty?
-  puts LsFile.ls(input_data.file_list, input_data.option_hash_list, input_data.max_char_length)
+unless input_data.files.empty?
+  puts LsFile.ls(input_data.files, input_data.options, input_data.max_char_length)
 end
 
-unless input_data.directory_list.empty?
-  puts unless input_data.file_list.empty? || input_data.error_list.empty?
+unless input_data.directories.empty?
+  puts unless input_data.files.empty?
 
-  puts LsDirectory.ls(input_data.directory_list, input_data.option_hash_list, input_data.max_char_length)
+  puts LsDirectory.ls(input_data.directories, input_data.options, input_data.max_char_length)
 end

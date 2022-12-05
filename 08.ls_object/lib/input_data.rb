@@ -4,20 +4,20 @@
 require 'optparse'
 
 class InputData
-  attr_reader :error_list, :option_hash_list, :file_list, :directory_list
+  attr_reader :errors, :options, :files, :directories
 
   def initialize
-    @error_list = []
-    @option_hash_list = {}
-    @file_list = []
-    @directory_list = []
+    @errors = []
+    @options = {}
+    @files = []
+    @directories = []
   end
 
   def argument_parsing
     opt = OptionParser.new
-    opt.on('-a') { |v| @option_hash_list[:a] = v }
-    opt.on('-r') { |v| @option_hash_list[:r] = v }
-    opt.on('-l') { |v| @option_hash_list[:l] = v }
+    opt.on('-a') { |v| @options[:a] = v }
+    opt.on('-r') { |v| @options[:r] = v }
+    opt.on('-l') { |v| @options[:l] = v }
     opt.parse!(ARGV)
     ARGV
   end
@@ -25,24 +25,24 @@ class InputData
   def argv_parsing
     argument_parsing.each do |path|
       if FileTest.directory?(path)
-        @directory_list.push(path)
+        @directories.push(path)
       elsif FileTest.file?(path)
-        @file_list.push(path)
+        @files.push(path)
       else
-        @error_list.push(path)
+        @errors.push(path)
       end
     end
 
-    @directory_list.push('.') if @file_list.empty? && @directory_list.empty? && @error_list.empty?
+    @directories.push('.') if @files.empty? && @directories.empty? && @errors.empty?
   end
 
   def max_char_length
-    all_file_name = @file_list + retrieve_file_list(@directory_list)
+    all_file_name = @files + retrieve_files(@directories)
     all_file_name.empty? ? 0 : all_file_name.max_by(&:length).length + 1
   end
 
-  def retrieve_file_list(search_paths)
-    if @option_hash_list[:a]
+  def retrieve_files(search_paths)
+    if @options[:a]
       # "".."を入れる方法がわからなかったので、ここで入れる。文字最大長を知りたいだけなのでソート不要
       search_paths.flat_map { |path| Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') }
     else

@@ -23,8 +23,8 @@ class Formatter
     lists.each_slice(column).map { |split_array| split_array }.transpose
   end
 
-  def self.convert_list_segment(file_list, path)
-    file_list.map { |file| construct_list_segment(file, path) }
+  def self.convert_list_segment(files, path)
+    files.map { |file| construct_list_segment(file, path) }
   end
 
   def self.construct_list_segment(file_name, path)
