@@ -4,10 +4,9 @@
 require 'optparse'
 
 class InputData
-  attr_reader :errors, :options, :files, :directories
+  attr_reader :options, :files, :directories
 
   def initialize
-    @errors = []
     @options = {}
     @files = []
     @directories = []
@@ -26,14 +25,12 @@ class InputData
     argument_parsing.each do |path|
       if FileTest.directory?(path)
         @directories.push(path)
-      elsif FileTest.file?(path)
-        @files.push(path)
       else
-        @errors.push(path)
+        @files.push(path)
       end
     end
 
-    @directories.push('.') if @files.empty? && @directories.empty? && @errors.empty?
+    @directories.push('.') if @files.empty? && @directories.empty?
   end
 
   def max_char_length
