@@ -11,10 +11,7 @@ ENV['POSIXLY_CORRECT'] = '1'
 input_data = InputData.new
 input_data.argv_parsing
 
-puts LsFile.file_error(input_data.error_list) unless input_data.error_list.empty?
-
 unless input_data.file_list.empty?
-  puts unless input_data.error_list.empty?
   puts LsFile.ls(input_data.file_list, input_data.option_hash_list, input_data.max_char_length)
 end
 
