@@ -5,18 +5,35 @@ require_relative '../lib/input_data'
 require_relative '../lib/ls_file'
 require_relative '../lib/ls_directory'
 
+require 'optparse'
+
 # オプションの指定はコマンド直後にしたいので環境変数を設定しておく
 ENV['POSIXLY_CORRECT'] = '1'
 
-input_data = InputData.new
-input_data.files_path
+options = {}
+opt = OptionParser.new
+opt.on('-a') { |v| options[:a] = v }
+opt.on('-r') { |v| options[:r] = v }
+opt.on('-l') { |v| options[:l] = v }
+opt.parse!(ARGV)
 
-unless input_data.files.empty?
-  puts LsFile.ls(input_data.files, input_data.options, input_data.max_char_length)
+files = []
+directories = []
+ARGV.each do |path|
+  if FileTest.directory?(path)
+    directories.push(path)
+  else
+    files.push(path)
+  end
 end
+directories.push('.') if files.empty? && directories.empty?
 
-unless input_data.directories.empty?
-  puts unless input_data.files.empty?
+input = InputData.new(files, directories, options)
 
-  puts LsDirectory.ls(input_data.directories, input_data.options, input_data.max_char_length)
+puts LsFile.ls(input.files, input.options, input.max_char_length) unless input.files.empty?
+
+unless input.directories.empty?
+  puts unless input.files.empty?
+
+  puts LsDirectory.ls(input.directories, input.options, input.max_char_length)
 end
