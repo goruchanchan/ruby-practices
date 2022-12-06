@@ -28,12 +28,15 @@ ARGV.each do |path|
 end
 directories.push('.') if files.empty? && directories.empty?
 
-input = InputData.new(files, directories, options)
+input_file = InputData.new(files, options)
+input_dir = InputData.new(directories, options)
 
-puts LsFile.ls(input.files, input.options, input.max_char_length) unless input.files.empty?
+input_file.max_char_length > input_dir.max_char_length ? input_dir.max_char_length = input_file.max_char_length : input_file.max_char_length = input_dir.max_char_length
 
-unless input.directories.empty?
-  puts unless input.files.empty?
+puts LsFile.ls(input_file.name, input_file.options, input_file.max_char_length) unless input_file.names.empty?
 
-  puts LsDirectory.ls(input.directories, input.options, input.max_char_length)
+unless input_dir.names.empty?
+  puts unless input_file.names.empty?
+
+  puts LsDirectory.ls(input_dir.names, input_dir.options, input_dir.max_char_length)
 end

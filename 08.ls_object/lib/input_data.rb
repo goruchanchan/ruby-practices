@@ -2,20 +2,21 @@
 # frozen_string_literal: true
 
 class InputData
-  attr_reader :options, :files, :directories, :max_char_length, :option_all, :option_long, :option_reverse
+  attr_reader :names, :option_all, :option_long, :option_reverse,
+              :options
+  attr_accessor :max_char_length
 
-  def initialize(files, directories, options)
-    @files = files
-    @directories = directories
-    @options = options
+  def initialize(names, options)
+    @names = names
     @option_all = options[:a]
     @option_long = options[:l]
     @option_reverse = options[:reverse]
     @max_char_length = search_max_char_length
+    @options = options # 最終的に消す
   end
 
   def search_max_char_length
-    all_file_name = @files + retrieve_files(@directories)
+    all_file_name = retrieve_files(@names)
     all_file_name.empty? ? 0 : all_file_name.max_by(&:length).length + 1
   end
 
