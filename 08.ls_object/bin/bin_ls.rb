@@ -33,8 +33,10 @@ input_dir = InputData.new(directories, options)
 
 input_file.max_char_length > input_dir.max_char_length ? input_dir.max_char_length = input_file.max_char_length : input_file.max_char_length = input_dir.max_char_length
 
-ls_file = LsFile.new(input_file)
-puts ls_file.ls
+unless input_file.names.empty?
+  ls_file = LsFile.new(input_file)
+  puts ls_file.ls
+end
 
 #puts LsFile.ls(input_file.name, input_file.options, input_file.max_char_length) unless input_file.names.empty?
 
