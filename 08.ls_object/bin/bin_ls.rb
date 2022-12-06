@@ -31,14 +31,13 @@ directories.push('.') if files.empty? && directories.empty?
 input_file = InputData.new(files, options)
 input_dir = InputData.new(directories, options)
 
+# 最大文字数を更新する
 input_file.max_char_length > input_dir.max_char_length ? input_dir.max_char_length = input_file.max_char_length : input_file.max_char_length = input_dir.max_char_length
 
 unless input_file.names.empty?
   ls_file = LsFile.new(input_file)
   puts ls_file.ls
 end
-
-#puts LsFile.ls(input_file.name, input_file.options, input_file.max_char_length) unless input_file.names.empty?
 
 # unless input_dir.names.empty?
 #   puts unless input_file.names.empty?
