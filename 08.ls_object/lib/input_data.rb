@@ -2,12 +2,15 @@
 # frozen_string_literal: true
 
 class InputData
-  attr_reader :options, :files, :directories, :max_char_length
+  attr_reader :options, :files, :directories, :max_char_length, :option_all, :option_long, :option_reverse
 
   def initialize(files, directories, options)
     @files = files
     @directories = directories
     @options = options
+    @option_all = options[:a]
+    @option_long = options[:l]
+    @option_reverse = options[:reverse]
     @max_char_length = search_max_char_length
   end
 
@@ -17,7 +20,7 @@ class InputData
   end
 
   def retrieve_files(search_paths)
-    if @options[:a]
+    if @option_all
       # "".."を入れる方法がわからなかったので、ここで入れる。文字最大長を知りたいだけなのでソート不要
       search_paths.flat_map { |path| Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') }
     else
