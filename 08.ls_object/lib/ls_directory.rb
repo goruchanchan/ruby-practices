@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative 'formatter'
 require_relative 'ls_file'
 
 class LsDirectory < LsFile
@@ -11,12 +10,11 @@ class LsDirectory < LsFile
              else
                retrieve_hashes
              end
-
     @input_data.option_long ? direcoty_long_message : direcoty_message
   end
 
   def direcoty_message
-    @names = @names.each { |list| list[:file_list] = Formatter.convert_array list[:file_list] }
+    @names = @names.each { |list| list[:file_list] = convert_array list[:file_list] }
     @names.map do |file_list|
       "#{arrange_directory_name(file_list[:path])}#{view_message(file_list[:file_list])}".concat("\n")
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
@@ -25,8 +23,8 @@ class LsDirectory < LsFile
   def direcoty_long_message
     @names.map do |list|
       block_size = calculate_block_size(list[:file_list], list[:path])
-      long_files = Formatter.convert_list_segment(list[:file_list], list[:path])
-      "#{arrange_directory_name(list[:path])}total #{block_size}\n#{view_long_message(long_files)}\n"
+      long_names = convert_list_segment(list[:file_list], list[:path])
+      "#{arrange_directory_name(list[:path])}total #{block_size}\n#{view_long_message(long_names)}\n"
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
   end
 

@@ -4,11 +4,11 @@
 require 'etc'
 require 'matrix'
 
-class Formatter
+module Formatter
   PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
   MAX_COLUMN = 3
 
-  def self.convert_array(lists)
+  def convert_array(lists)
     if lists.length % MAX_COLUMN != 0
       # 行列変換させるために足りない要素にnilをつめていく
       start_fill_nil = lists.length + 1
@@ -19,15 +19,14 @@ class Formatter
       # 転置してMAX_COLUMN列にするので、sliceではMAX_COLUMN行にする
       column = (lists.length / MAX_COLUMN)
     end
-
     lists.each_slice(column).map { |split_array| split_array }.transpose
   end
 
-  def self.convert_list_segment(files, path)
+  def convert_list_segment(files, path)
     files.map { |file| construct_list_segment(file, path) }
   end
 
-  def self.construct_list_segment(file_name, path)
+  def construct_list_segment(file_name, path)
     full_file_name = "#{path}/#{file_name}"
     file_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
     month = file_info.mtime.to_a[4].to_s.rjust(2)
@@ -42,11 +41,11 @@ class Formatter
     list.push(file_name)
   end
 
-  def self.replace_file_type(file_name)
+  def replace_file_type(file_name)
     { file: '-', directory: 'd', link: 'l' }[File.ftype(file_name).intern]
   end
 
-  def self.parsing_permission(file_mode)
+  def parsing_permission(file_mode)
     owener_permission = ((file_mode >> 6) % 8)
     group_permission = ((file_mode >> 3) % 8)
     other_permission = file_mode % 8
