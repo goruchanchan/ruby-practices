@@ -1,9 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative 'ls_file'
+require_relative 'formatter'
+require_relative 'Viewer'
 
-class LsDirectory < LsFile
+class LsDirectory
+  include Formatter
+  include Viewer
+
+  def initialize(input_data)
+    @input_data = input_data
+    @names = []
+  end
+
   def ls
     @names = if @input_data.option_reverse
                reverse_hashes(retrieve_hashes)
