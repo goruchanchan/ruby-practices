@@ -39,8 +39,9 @@ unless input_file.names.empty?
   puts ls_file.ls
 end
 
-# unless input_dir.names.empty?
-#   puts unless input_file.names.empty?
+unless input_dir.names.empty?
+  puts unless input_file.names.empty?
 
-#   puts LsDirectory.ls(input_dir.names, input_dir.options, input_dir.max_char_length)
-# end
+  ls_dir = LsDirectory.new(input_dir)
+  puts ls_dir.ls
+end
