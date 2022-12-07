@@ -41,7 +41,7 @@ class LsDirectory < LsFile
   end
 
   def arrange_directory_name(dir_name)
-    "#{dir_name}:\n" unless dir_name.empty?
+    "#{dir_name}:\n" if @input_data.names.size > 1
   end
 
   def retrieve_hashes
