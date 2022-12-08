@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
+require_relative '../lib/input_data'
 require_relative '../lib/ls_file'
 require_relative '../lib/ls_directory'
 
@@ -9,14 +10,16 @@ class LsCommandTest < Minitest::Test
     expected = <<~TEXT.chomp
       Gemfile       Gemfile.lock
     TEXT
-    assert_equal expected, LsFile.ls(%w[Gemfile Gemfile.lock], { l: false, r: false }, 13)
+    input_file = InputData.new(%w[Gemfile Gemfile.lock], { a: false, l: false, r: false })
+    assert_equal expected, LsFile.new(input_file).ls
   end
 
   def test_file_r_option
     expected = <<~TEXT.chomp
       Gemfile.lock  Gemfile
     TEXT
-    assert_equal expected, LsFile.ls(%w[Gemfile Gemfile.lock], { l: false, r: true }, 13)
+    input_file = InputData.new(%w[Gemfile Gemfile.lock], { a: false, l: false, r: true })
+    assert_equal expected, LsFile.new(input_file).ls
   end
 
   def test_file_l_option
@@ -24,7 +27,8 @@ class LsCommandTest < Minitest::Test
       -rw-r--r--  1 ryo  staff  141 11 29 21:52 Gemfile
       -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
     TEXT
-    assert_equal expected, LsFile.ls(%w[Gemfile Gemfile.lock], { l: true, r: false }, 13)
+    input_file = InputData.new(%w[Gemfile Gemfile.lock], { a: false, l: true, r: false })
+    assert_equal expected, LsFile.new(input_file).ls
   end
 
   def test_file_rl_option
@@ -32,7 +36,8 @@ class LsCommandTest < Minitest::Test
       -rw-r--r--  1 ryo  staff  878 11 25 23:38 Gemfile.lock
       -rw-r--r--  1 ryo  staff  141 11 29 21:52 Gemfile
     TEXT
-    assert_equal expected, LsFile.ls(%w[Gemfile Gemfile.lock], { l: true, r: true }, 13)
+    input_file = InputData.new(%w[Gemfile Gemfile.lock], { a: false, l: true, r: true })
+    assert_equal expected, LsFile.new(input_file).ls
   end
 
   def test_directory_no_option
@@ -40,7 +45,8 @@ class LsCommandTest < Minitest::Test
       Gemfile         bin             test
       Gemfile.lock    lib
     TEXT
-    assert_equal expected, LsDirectory.ls(%w[.], { a: false, l: false, r: false }, 13)
+    input_dir = InputData.new(%w[.], { a: false, l: false, r: false })
+    assert_equal expected, LsDirectory.new(input_dir).ls
   end
 
   def test_directory_r_option
@@ -48,7 +54,8 @@ class LsCommandTest < Minitest::Test
       test            bin             Gemfile
       lib             Gemfile.lock
     TEXT
-    assert_equal expected, LsDirectory.ls(%w[.], { a: false, l: false, r: true }, 13)
+    input_dir = InputData.new(%w[.], { a: false, l: false, r: true })
+    assert_equal expected, LsDirectory.new(input_dir).ls
   end
 
   def test_directory_l_option
@@ -70,7 +77,8 @@ class LsCommandTest < Minitest::Test
       -rw-r--r--   1 ryo  staff    0 11 25 21:52 bbbb.rb
       drwxr-xr-x  13 ryo  staff  416 11 25 21:53 child_dir
     TEXT
-    assert_equal expected, LsDirectory.ls(%w[test/test_data], { a: false, l: true, r: false }, 13)
+    input_dir = InputData.new(%w[test/test_data], { a: false, l: true, r: false })
+    assert_equal expected, LsDirectory.new(input_dir).ls
   end
 
   def test_directory_a_option
@@ -79,7 +87,8 @@ class LsCommandTest < Minitest::Test
       ..              Gemfile.lock    test
       .rubocop.yml    bin
     TEXT
-    assert_equal expected, LsDirectory.ls(%w[.], { a: true, l: false, r: false }, 13)
+    input_dir = InputData.new(%w[.], { a: true, l: false, r: false })
+    assert_equal expected, LsDirectory.new(input_dir).ls
   end
 
   def test_directory_rla_option
@@ -99,6 +108,7 @@ class LsCommandTest < Minitest::Test
       drwxr-xr-x  18 ryo  staff  576 11 25 22:28 ..
       drwxr-xr-x  13 ryo  staff  416 11 25 21:53 .
     TEXT
-    assert_equal expected, LsDirectory.ls(%w[test/test_data/child_dir], { a: true, l: true, r: true }, 13)
+    input_dir = InputData.new(%w[test/test_data/child_dir], { a: true, l: true, r: true })
+    assert_equal expected, LsDirectory.new(input_dir).ls
   end
 end

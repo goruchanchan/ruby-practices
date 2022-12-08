@@ -24,6 +24,7 @@ class LsDirectory
 
   def direcoty_message
     @names = @names.each { |list| list[:file_list] = convert_array list[:file_list] }
+    @input_data.max_char_length += 2 # ディレクトリのネーム間は、ファイルよりも半角2スペース多い
     @names.map do |file_list|
       "#{arrange_directory_name(file_list[:path])}#{view_message(file_list[:file_list])}".concat("\n")
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
