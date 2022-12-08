@@ -14,11 +14,7 @@ class LsDirectory
   end
 
   def ls
-    @names = if @input_data.option_reverse
-               reverse_hashes(retrieve_hashes)
-             else
-               retrieve_hashes
-             end
+    @names = @input_data.option_reverse ? reverse_hashes(retrieve_hashes) : retrieve_hashes
     @input_data.option_long ? direcoty_long_message : direcoty_message
   end
 

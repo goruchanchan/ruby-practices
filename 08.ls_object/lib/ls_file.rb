@@ -14,11 +14,7 @@ class LsFile
   end
 
   def ls
-    @names = if @input_data.option_reverse
-               @input_data.names.reverse
-             else
-               @input_data.names
-             end
+    @names = @input_data.option_reverse ? @input_data.names.reverse : @input_data.names
     @input_data.option_long ? file_long_message : file_message
   end
 
