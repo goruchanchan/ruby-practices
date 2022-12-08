@@ -15,8 +15,8 @@ class InputData
   end
 
   def search_max_char_length
-    all_file_name = @names + retrieve_files
-    all_file_name.empty? ? 0 : all_file_name.max_by(&:length).length + 1
+    all_names = @names + retrieve_files
+    all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
   end
 
   def retrieve_files
