@@ -14,7 +14,7 @@ class LsDirectory
   end
 
   def ls
-    @path_and_names = @input_data.option_reverse ? reverse_retrieve_hashes : retrieve_hashes
+    @path_and_names = @input_data.option_reverse ? reverse_hashes : retrieve_hashes
     @input_data.option_long ? direcoty_long_message : direcoty_message
   end
 
@@ -51,7 +51,7 @@ class LsDirectory
     end
   end
 
-  def reverse_retrieve_hashes
+  def reverse_hashes
     # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
     retrieve_hashes.reverse.map { |key| { path: key[:path], file_list: key[:file_list].sort_by(&:to_s).reverse } }
   end
