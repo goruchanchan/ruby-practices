@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require_relative 'formatter'
-require_relative 'Viewer'
+require_relative 'viewer'
 
 class LsDirectory
   include Formatter

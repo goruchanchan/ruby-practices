@@ -12,7 +12,6 @@ class InputData
     @option_long = options[:l]
     @option_reverse = options[:r]
     @max_char_length = search_max_char_length
-    @options = options # 最終的に消す
   end
 
   def search_max_char_length
