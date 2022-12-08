@@ -28,17 +28,17 @@ module Formatter
 
   def construct_list_segment(file_name, path)
     full_file_name = "#{path}/#{file_name}"
-    file_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
-    month = file_info.mtime.to_a[4].to_s.rjust(2)
-    day = file_info.mtime.to_a[3].to_s.rjust(2)
-    clock = file_info.mtime.to_a[2].to_s.rjust(2, '0')
-    minitus = file_info.mtime.to_a[1].to_s.rjust(2, '0')
-    file_name = "#{file_name} -> #{File.readlink(full_file_name)}" if file_info.symlink?
-    list = []
-    list.push("#{replace_file_type(full_file_name)}#{parsing_permission(file_info.mode)}")
-    list.push(file_info.nlink, Etc.getpwuid(file_info.uid).name, Etc.getgrgid(file_info.gid).name, file_info.size)
-    list.push("#{month} #{day} #{clock}:#{minitus}")
-    list.push(file_name)
+    long_info = File.lstat(full_file_name) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
+    month = long_info.mtime.to_a[4].to_s.rjust(2)
+    day = long_info.mtime.to_a[3].to_s.rjust(2)
+    clock = long_info.mtime.to_a[2].to_s.rjust(2, '0')
+    minitus = long_info.mtime.to_a[1].to_s.rjust(2, '0')
+    file_name = "#{file_name} -> #{File.readlink(full_file_name)}" if long_info.symlink?
+    long_files = []
+    long_files.push("#{replace_file_type(full_file_name)}#{parsing_permission(long_info.mode)}")
+    long_files.push(long_info.nlink, Etc.getpwuid(long_info.uid).name, Etc.getgrgid(long_info.gid).name, long_info.size)
+    long_files.push("#{month} #{day} #{clock}:#{minitus}")
+    long_files.push(file_name)
   end
 
   def replace_file_type(file_name)
