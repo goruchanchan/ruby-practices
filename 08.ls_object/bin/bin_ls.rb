@@ -20,11 +20,7 @@ opt.parse!(ARGV)
 files = []
 directories = []
 ARGV.each do |path|
-  if FileTest.directory?(path)
-    directories.push(path)
-  else
-    files.push(path)
-  end
+  FileTest.directory?(path) ? directories.push(path) : files.push(path)
 end
 directories.push('.') if files.empty? && directories.empty?
 
@@ -32,7 +28,11 @@ input_file = InputData.new(files, options)
 input_dir = InputData.new(directories, options)
 
 # 最大文字数を更新する
-input_file.max_char_length > input_dir.max_char_length ? input_dir.max_char_length = input_file.max_char_length : input_file.max_char_length = input_dir.max_char_length
+if input_file.max_char_length > input_dir.max_char_length
+  input_dir.max_char_length = input_file.max_char_length
+else
+  input_file.max_char_length = input_dir.max_char_length
+end
 
 puts LsFile.new(input_file).ls unless input_file.names.empty?
 
