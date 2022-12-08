@@ -10,24 +10,24 @@ class LsDirectory
 
   def initialize(input_data)
     @input_data = input_data
-    @names = []
+    @path_and_names = []
   end
 
   def ls
-    @names = @input_data.option_reverse ? reverse_hashes(retrieve_hashes) : retrieve_hashes
+    @path_and_names = @input_data.option_reverse ? reverse_retrieve_hashes : retrieve_hashes
     @input_data.option_long ? direcoty_long_message : direcoty_message
   end
 
   def direcoty_message
-    @names = @names.each { |list| list[:file_list] = convert_array list[:file_list] }
+    @path_and_names = @path_and_names.each { |list| list[:file_list] = convert_array list[:file_list] }
     @input_data.max_char_length += 2 # ディレクトリのネーム間は、ファイルよりも半角2スペース多い
-    @names.map do |file_list|
+    @path_and_names.map do |file_list|
       "#{arrange_directory_name(file_list[:path])}#{view_message(file_list[:file_list])}".concat("\n")
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
   end
 
   def direcoty_long_message
-    @names.map do |list|
+    @path_and_names.map do |list|
       block_size = calculate_block_size(list[:file_list], list[:path])
       long_names = convert_list_segment(list[:file_list], list[:path])
       "#{arrange_directory_name(list[:path])}total #{block_size}\n#{view_long_message(long_names)}\n"
@@ -51,8 +51,8 @@ class LsDirectory
     end
   end
 
-  def reverse_hashes(hashes)
+  def reverse_retrieve_hashes
     # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
-    hashes.reverse.map { |key| { path: key[:path], file_list: key[:file_list].sort_by(&:to_s).reverse } }
+    retrieve_hashes.reverse.map { |key| { path: key[:path], file_list: key[:file_list].sort_by(&:to_s).reverse } }
   end
 end
