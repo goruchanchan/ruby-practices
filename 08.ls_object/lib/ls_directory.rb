@@ -19,23 +19,23 @@ class LsDirectory
   end
 
   def direcoty_message
-    @path_and_names = @path_and_names.each { |list| list[:file_list] = convert_array list[:file_list] }
+    @path_and_names = @path_and_names.each { |list| list[:names] = convert_array list[:names] }
     @input_data.max_char_length += 2 # ディレクトリのネーム間は、ファイルよりも半角2スペース多い
-    @path_and_names.map do |file_list|
-      "#{arrange_directory_name(file_list[:path])}#{view_message(file_list[:file_list])}".concat("\n")
+    @path_and_names.map do |list|
+      "#{arrange_directory_name(list[:paths])}#{view_message(list[:names])}".concat("\n")
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
   end
 
   def direcoty_long_message
     @path_and_names.map do |list|
-      block_size = calculate_block_size(list[:file_list], list[:path])
-      long_names = convert_list_segment(list[:file_list], list[:path])
-      "#{arrange_directory_name(list[:path])}total #{block_size}\n#{view_long_message(long_names)}\n"
+      block_size = calculate_block_size(list[:names], list[:paths])
+      long_names = convert_list_segment(list[:names], list[:paths])
+      "#{arrange_directory_name(list[:paths])}total #{block_size}\n#{view_long_message(long_names)}\n"
     end.join("\n").chomp("\n") # "\n" で結合するが、最後は余分なので削除
   end
 
-  def calculate_block_size(file_list, path)
-    file_list.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
+  def calculate_block_size(names, path)
+    names.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
   end
 
   def arrange_directory_name(dir_name)
@@ -45,14 +45,14 @@ class LsDirectory
   def retrieve_hashes
     if @input_data.option_all
       # "".."を入れる方法がわからなかったので、ここで入れる。並び替えがずれるので、入れた後にもソートする
-      @input_data.names.map { |path| { path: path, file_list: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort_by(&:to_s) } }
+      @input_data.names.map { |path| { paths: path, names: Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..').sort_by(&:to_s) } }
     else
-      @input_data.names.map { |path| { path: path, file_list: Dir.glob('*', base: path) } }
+      @input_data.names.map { |path| { paths: path, names: Dir.glob('*', base: path) } }
     end
   end
 
   def reverse_hashes
     # ".."がsortメソッドでうまくソートされなかったので、sort_byでString型にしてソートする
-    retrieve_hashes.reverse.map { |key| { path: key[:path], file_list: key[:file_list].sort_by(&:to_s).reverse } }
+    retrieve_hashes.reverse.map { |key| { paths: key[:paths], names: key[:names].sort_by(&:to_s).reverse } }
   end
 end
