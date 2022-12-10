@@ -2,8 +2,7 @@
 # frozen_string_literal: true
 
 class InputData
-  attr_reader :names, :option_all, :option_long, :option_reverse,
-              :options
+  attr_reader :names, :option_all, :option_long, :option_reverse
   attr_accessor :max_char_length
 
   def initialize(names, options)
