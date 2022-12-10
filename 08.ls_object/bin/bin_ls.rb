@@ -7,9 +7,6 @@ require_relative '../lib/ls_directory'
 
 require 'optparse'
 
-# オプションの指定はコマンド直後にしたいので環境変数を設定しておく
-ENV['POSIXLY_CORRECT'] = '1'
-
 options = {}
 opt = OptionParser.new
 opt.on('-a') { |v| options[:a] = v }
