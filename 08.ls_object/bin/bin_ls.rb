@@ -9,32 +9,17 @@ require 'optparse'
 
 options = {}
 opt = OptionParser.new
-opt.on('-a') { |v| options[:a] = v }
-opt.on('-r') { |v| options[:r] = v }
-opt.on('-l') { |v| options[:l] = v }
+opt.on('-a') { |v| options[:all] = v }
+opt.on('-r') { |v| options[:reverse] = v }
+opt.on('-l') { |v| options[:long] = v }
 opt.parse!(ARGV)
 
-files = []
-directories = []
-ARGV.each do |path|
-  FileTest.directory?(path) ? directories.push(path) : files.push(path)
-end
-directories.push('.') if files.empty? && directories.empty?
+input = Input.new(paths: ARGV, option_all: options[:all], option_long: options[:long], option_reverse: options[:reverse])
+p input
+#puts LsFile.new(input.files).ls unless input_file.names.empty?
 
-input_file = InputData.new(files, options)
-input_dir = InputData.new(directories, options)
+# unless input_dir.names.empty?
+#   puts unless input_file.names.empty?
 
-# 最大文字数を更新する
-if input_file.max_char_length > input_dir.max_char_length
-  input_dir.max_char_length = input_file.max_char_length
-else
-  input_file.max_char_length = input_dir.max_char_length
-end
-
-puts LsFile.new(input_file).ls unless input_file.names.empty?
-
-unless input_dir.names.empty?
-  puts unless input_file.names.empty?
-
-  puts LsDirectory.new(input_dir).ls
-end
+#   puts LsDirectory.new(input_dir).ls
+# end
