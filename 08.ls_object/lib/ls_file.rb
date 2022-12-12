@@ -26,28 +26,37 @@ require_relative 'viewer'
   # end
 # end
 
-class LsFile
-  def initialize(path)
-    @path = path
+# ファイル情報を集めただけのクラス
+class File
+  attr_reader :names
+
+  def initialize(path:)
+    @names = path
   end
 end
 
-class LsDirectory
-  def initialize(path)
-    @title = path
+# ディレクトリ情報を集めただけのクラス
+class Directory
+  attr_reader :path, :names
+
+  def initialize(path:, option_all:, option_reverse:)
     @path = path
+    @names = option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') : Dir.glob('*', base: path)
+    @names = option_reverse ? @names.sort_by(&:to_s).reverse : @names.sort_by(&:to_s)
   end
 end
 
+# ファイルまたはディレクトリ毎にまとめるだけのクラス
 class FileGroup
-  def initialize(paths)
-    @paths = paths
-    @files = classify_file_type
-  end
+  attr_reader :group
 
-  def classify_file_type
-    @paths.map do |path|
-      FileTest.directory?(path) ? LsDirectory.new(path) : LsFile.new(path)
+  def initialize(path:, option_all:, option_reverse:)
+    if FileTest.directory?(path)
+      @title = path
+      @group = Directory.new(path: path, option_all: option_all, option_reverse: option_reverse)
+    else
+      @title = nil
+      @group = File.new(path: path)
     end
   end
 end
