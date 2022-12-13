@@ -28,19 +28,19 @@ require_relative 'viewer'
 
 # ファイル情報を集めただけのクラス
 class File
-  attr_reader :names
+  attr_reader :name
 
   def initialize(path:)
-    @names = path
+    @name = path
   end
 end
 
 # ディレクトリ情報を集めただけのクラス
 class Directory
-  attr_reader :path, :names
+  attr_reader :title, :names
 
   def initialize(path:, option_all:, option_reverse:)
-    @path = path
+    @title = path
     @names = option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') : Dir.glob('*', base: path)
     @names = option_reverse ? @names.sort_by(&:to_s).reverse : @names.sort_by(&:to_s)
   end
@@ -48,15 +48,12 @@ end
 
 # ファイルまたはディレクトリ毎にまとめるだけのクラス
 class FileGroup
-  attr_reader :group
+  attr_reader :group, :option_long, :max_char_length
 
-  def initialize(path:, option_all:, option_reverse:)
-    if FileTest.directory?(path)
-      @title = path
-      @group = Directory.new(path: path, option_all: option_all, option_reverse: option_reverse)
-    else
-      @title = nil
-      @group = File.new(path: path)
-    end
+  def initialize(files:, directories:, option_long:, max_char_length:)
+    @group = []
+    @group.push(files).push(directories)
+    @option_long = option_long
+    @max_char_length = max_char_length
   end
 end

@@ -31,28 +31,38 @@
 
 # 入力を整理するクラス
 class Input
+  attr_reader :group
+
   def initialize(paths:, option_all:, option_long:, option_reverse:)
     @option_all = option_all
-    @option_long = option_long
     @option_reverse = option_reverse
 
     @paths = paths.empty? ? ['.'] : paths
     @paths = @option_reverse ? @paths.reverse : @paths
 
-    @file_groups = make_file_group
-    @all_names = collect_names
-    @max_char_length = search_max_char_length
+    @files = []
+    @directories = []
+    classfy_type
+
+    @group = FileGroup.new(files: @files, directories: @directories, option_long: option_long, max_char_length: search_max_char_length)
   end
 
-  def make_file_group
-    @paths.map { |path| FileGroup.new(path: path, option_all: @option_all, option_reverse: @option_reverse) }
-  end
-
-  def collect_names
-    @file_groups.flat_map { |file_group| file_group.group.names }
+  def classfy_type
+    @paths.map do |path|
+      if FileTest.directory?(path)
+        @directories.push(Directory.new(path: path, option_all: @option_all, option_reverse: @option_reverse))
+      else
+        @files.push(File.new(path: path))
+      end
+    end
   end
 
   def search_max_char_length
-    @all_names.empty? ? 0 : @all_names.max_by(&:length).length + 1
+    all_names = collect_names
+    all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
+  end
+
+  def collect_names
+    @files.flat_map(&:name) + @directories.flat_map(&:names)
   end
 end
