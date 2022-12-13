@@ -31,38 +31,40 @@
 
 # 入力を整理するクラス
 class Input
-  attr_reader :group
+  attr_reader :groups, :max_char_length
 
-  def initialize(paths:, option_all:, option_long:, option_reverse:)
+  def initialize(paths:, option_all:, option_reverse:)
     @option_all = option_all
     @option_reverse = option_reverse
 
     @paths = paths.empty? ? ['.'] : paths
     @paths = @option_reverse ? @paths.reverse : @paths
 
-    @files = []
-    @directories = []
+    @groups = []
     classfy_type
-
-    @group = FileGroup.new(files: @files, directories: @directories, option_long: option_long, max_char_length: search_max_char_length)
+    @max_char_length = search_max_char_length
   end
 
   def classfy_type
-    @paths.map do |path|
+    files = []
+    @paths.each do |path|
       if FileTest.directory?(path)
-        @directories.push(Directory.new(path: path, option_all: @option_all, option_reverse: @option_reverse))
+        @groups.push(FileGroup.new(path: path, directory: Directory.new(names: make_names_parse_option(path))))
       else
-        @files.push(File.new(path: path))
+        files.push(File.new(path: path))
       end
     end
+    # 先頭にFileグループを追加。files をディレクトリに入れるのはなんか微妙な気がする。
+    @groups.unshift(FileGroup.new(path: nil, directory: Directory.new(names: files.flat_map(&:name)))) unless files.empty?
+  end
+
+  def make_names_parse_option(path)
+    names = @option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') : Dir.glob('*', base: path)
+    @option_reverse ? names.sort_by(&:to_s).reverse : names.sort_by(&:to_s)
   end
 
   def search_max_char_length
-    all_names = collect_names
+    all_names = @groups.flat_map { |group| group.directory.file_names }
     all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
-  end
-
-  def collect_names
-    @files.flat_map(&:name) + @directories.flat_map(&:names)
   end
 end

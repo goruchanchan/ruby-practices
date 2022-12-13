@@ -37,23 +37,19 @@ end
 
 # ディレクトリ情報を集めただけのクラス
 class Directory
-  attr_reader :title, :names
+  attr_reader :file_names
 
-  def initialize(path:, option_all:, option_reverse:)
-    @title = path
-    @names = option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') : Dir.glob('*', base: path)
-    @names = option_reverse ? @names.sort_by(&:to_s).reverse : @names.sort_by(&:to_s)
+  def initialize(names:)
+    @file_names = names
   end
 end
 
 # ファイルまたはディレクトリ毎にまとめるだけのクラス
 class FileGroup
-  attr_reader :group, :option_long, :max_char_length
+  attr_reader :directory, :title
 
-  def initialize(files:, directories:, option_long:, max_char_length:)
-    @group = []
-    @group.push(files).push(directories)
-    @option_long = option_long
-    @max_char_length = max_char_length
+  def initialize(path:, directory:)
+    @title = path
+    @directory = directory
   end
 end

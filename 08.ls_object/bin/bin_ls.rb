@@ -14,8 +14,8 @@ opt.on('-r') { |v| options[:reverse] = v }
 opt.on('-l') { |v| options[:long] = v }
 opt.parse!(ARGV)
 
-input = Input.new(paths: ARGV, option_all: options[:all], option_long: options[:long], option_reverse: options[:reverse])
-p input.group
+input = Input.new(paths: ARGV, option_all: options[:all], option_reverse: options[:reverse])
+#Formatter.new(groups: input.groups).to_s
 #puts LsFile.new(input.files).ls unless input_file.names.empty?
 
 # unless input_dir.names.empty?
