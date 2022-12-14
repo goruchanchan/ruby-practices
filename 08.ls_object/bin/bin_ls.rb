@@ -2,8 +2,7 @@
 # frozen_string_literal: true
 
 require_relative '../lib/input_data'
-require_relative '../lib/ls_file'
-require_relative '../lib/ls_directory'
+require_relative '../lib/formatter'
 
 require 'optparse'
 
@@ -16,10 +15,3 @@ opt.parse!(ARGV)
 
 input = Input.new(paths: ARGV, option_all: options[:all], option_reverse: options[:reverse])
 puts Formatter.new(groups: input.groups, option_long: options[:long]).to_s
-#puts LsFile.new(input.files).ls unless input_file.names.empty?
-
-# unless input_dir.names.empty?
-#   puts unless input_file.names.empty?
-
-#   puts LsDirectory.new(input_dir).ls
-# end
