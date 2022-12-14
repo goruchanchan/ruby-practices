@@ -1,7 +1,7 @@
 # frozen_string_literalong: true
 
 require 'minitest/autorun'
-require_relative '../lib/input_data'
+require_relative '../lib/input'
 require_relative '../lib/formatter'
 
 class LsCommandTest < Minitest::Test

@@ -22,7 +22,7 @@ class Formatter
 
   def total_not_nil_group
     count = 0
-    @groups.map { |group| count += 1 unless group.title.nil? }
+    @groups.each { |group| count += 1 unless group.title.nil? }
     count
   end
 
@@ -90,7 +90,7 @@ class Formatter
 
   def normal_format
     @groups.map do |group|
-      result = (group.title.nil? || @not_nil_group_num < 2) ? '' : "#{group.title}:\n"
+      result = group.title.nil? || @not_nil_group_num < 2 ? '' : "#{group.title}:\n"
       result + normal_message(convert_array(group.files))
     end.join("\n\n")
   end
