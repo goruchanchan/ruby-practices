@@ -8,24 +8,36 @@ class Formatter
   PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
   MAX_COLUMN = 3
 
-  def initialize(groups:)
+  def initialize(groups:, option_long:)
     @groups = groups
+    @max_char_length = search_max_char_length
+    @option_long = option_long
+  end
+
+  def search_max_char_length
+    all_names = @groups.flat_map(&:files)
+    all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
   end
 
   def to_s
-    result = @groups.option_long ? long_format : "hoge"
-    p result
+    @option_long ? long_format : normal_format
   end
 
   def long_format
     result = ''
-    @groups.group.each do |group|
-      group.each do |unit|
-        result += unit.title unless unit.title.nil?
-        p unit
+    @groups.each do |group|
+      result += group.title unless group.title.nil?
+      group.files.each do |file|
       end
     end
     result
+  end
+
+  def normal_format
+    @groups.map do |group|
+      result = group.title.nil? ? '' : "#{group.title}:\n"
+      result + normal_message(convert_array(group.files))
+    end.join("\n\n")
   end
 
   def convert_array(lists)
@@ -72,10 +84,10 @@ class Formatter
     "#{PERMISSION_ARRAY[owener_permission]}#{PERMISSION_ARRAY[group_permission]}#{PERMISSION_ARRAY[other_permission]}"
   end
 
-  def view_message(names)
+  def normal_message(names)
     names.map do |column|
       column.map.with_index do |name, i|
-        column[i + 1].nil? ? name.to_s : name.to_s.ljust(@input_data.max_char_length + 1)
+        column[i + 1].nil? ? name.to_s : name.to_s.ljust(@max_char_length + 1)
       end.join
     end.join("\n")
   end

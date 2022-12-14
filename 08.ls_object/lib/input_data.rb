@@ -31,7 +31,7 @@
 
 # 入力を整理するクラス
 class Input
-  attr_reader :groups, :max_char_length
+  attr_reader :groups
 
   def initialize(paths:, option_all:, option_reverse:)
     @option_all = option_all
@@ -42,8 +42,9 @@ class Input
 
     @groups = []
     classfy_type
-    @max_char_length = search_max_char_length
   end
+
+  private
 
   def classfy_type
     files = []
@@ -57,10 +58,5 @@ class Input
   def parse_option(path)
     names = @option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: path).push('..') : Dir.glob('*', base: path)
     @option_reverse ? names.sort_by(&:to_s).reverse : names.sort_by(&:to_s)
-  end
-
-  def search_max_char_length
-    all_names = @groups.flat_map(&:files)
-    all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
   end
 end
