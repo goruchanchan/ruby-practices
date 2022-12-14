@@ -12,11 +12,18 @@ class Formatter
     @groups = groups
     @max_char_length = search_max_char_length
     @option_long = option_long
+    @not_nil_group_num = total_not_nil_group
   end
 
   def search_max_char_length
     all_names = @groups.flat_map(&:files)
     all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
+  end
+
+  def total_not_nil_group
+    count = 0
+    @groups.map { |group| count += 1 unless group.title.nil? }
+    count
   end
 
   def to_s
@@ -83,7 +90,7 @@ class Formatter
 
   def normal_format
     @groups.map do |group|
-      result = group.title.nil? ? '' : "#{group.title}:\n"
+      result = (group.title.nil? || @not_nil_group_num < 2) ? '' : "#{group.title}:\n"
       result + normal_message(convert_array(group.files))
     end.join("\n\n")
   end
