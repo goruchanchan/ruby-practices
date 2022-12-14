@@ -26,30 +26,30 @@ require_relative 'viewer'
   # end
 # end
 
-# ファイル情報を集めただけのクラス
-class File
-  attr_reader :name
+# # ファイル情報を集めただけのクラス
+# class File
+#   attr_reader :name
 
-  def initialize(path:)
-    @name = path
-  end
-end
+#   def initialize(path:)
+#     @path = path
+#   end
+# end
 
-# ディレクトリ情報を集めただけのクラス
-class Directory
-  attr_reader :file_names
+# # ディレクトリ情報を集めただけのクラス
+# class Directory
+#   attr_reader :file_names
 
-  def initialize(names:)
-    @file_names = names
-  end
-end
+#   def initialize(names:)
+#     @file_names = names
+#   end
+# end
 
 # ファイルまたはディレクトリ毎にまとめるだけのクラス
 class FileGroup
-  attr_reader :directory, :title
+  attr_reader :files, :title
 
-  def initialize(path:, directory:)
-    @title = path
-    @directory = directory
+  def initialize(title:, files:)
+    @title = title
+    @files = files
   end
 end
