@@ -36,9 +36,9 @@ class Formatter
       if group.title.nil?
         long_message(files: to_long_format_files(files: group.files, path: '.'))
       else
-        long_files = to_long_format_files(files: group.files, path: group.title)
         title = @not_nil_group_num > 1 ? "#{group.title}:\n" : ''
-        "#{title}total #{total_block_size(files: group.files, path: group.title)}\n#{long_message(files: long_files)}"
+        block_size = total_block_size(files: group.files, path: group.title)
+        "#{title}total #{block_size}\n#{long_message(files: to_long_format_files(files: group.files, path: group.title))}"
       end
     end.join("\n\n")
   end
