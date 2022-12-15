@@ -5,12 +5,11 @@ require 'etc'
 require 'matrix'
 
 class Formatter
-  PERMISSION_ARRAY = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
+  PERMISSIONS = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
   MAX_COLUMN = 3
 
   def initialize(groups:, option_long:)
     @groups = groups
-    @max_char_length = search_max_char_length
     @option_long = option_long
     @not_nil_group_num = total_not_nil_group
   end
@@ -36,7 +35,8 @@ class Formatter
         long_message(convert_list_segment(group.files, '.'))
       else
         long_files = convert_list_segment(group.files, group.title)
-        "#{group.title}:\ntotal #{total_block_size(group.files, group.title)}\n#{long_message(long_files)}"
+        title = @not_nil_group_num > 1 ? "#{group.title}:\n" : ''
+        "#{title}total #{total_block_size(group.files, group.title)}\n#{long_message(long_files)}"
       end
     end.join("\n\n")
   end
@@ -67,22 +67,22 @@ class Formatter
   end
 
   def file_permit(mode)
-    owener_permission = ((mode >> 6) % 8)
-    group_permission = ((mode >> 3) % 8)
-    other_permission = mode % 8
-    "#{PERMISSION_ARRAY[owener_permission]}#{PERMISSION_ARRAY[group_permission]}#{PERMISSION_ARRAY[other_permission]}"
+    owener = ((mode >> 6) % 8)
+    group = ((mode >> 3) % 8)
+    other = mode % 8
+    "#{PERMISSIONS[owener]}#{PERMISSIONS[group]}#{PERMISSIONS[other]}"
   end
 
-  def long_message(long_files)
-    paddings = (0..6).map { |n| Matrix.columns(long_files).row(n).max.to_s.length }
+  def long_message(files)
+    paddings = (0..6).map { |n| Matrix.columns(files).row(n).max.to_s.length }
 
-    long_files.map do |file|
-      file.map.each_with_index do |long_segment, i|
+    files.map do |file|
+      file.map.each_with_index do |segment, i|
         if i == file.size - 1
-          long_segment.dup
+          segment.dup
         else
           # 所有者とグループのところだけ空白2つっぽいので帳尻を合わせる
-          %w[0 2 3].include?(i.to_s) ? long_segment.to_s.ljust(paddings[i]).to_s.concat('  ') : long_segment.to_s.rjust(paddings[i]).to_s.concat(' ')
+          %w[0 2 3].include?(i.to_s) ? segment.to_s.ljust(paddings[i]).to_s.concat('  ') : segment.to_s.rjust(paddings[i]).to_s.concat(' ')
         end
       end.join
     end.join("\n")
@@ -91,27 +91,26 @@ class Formatter
   def normal_format
     @groups.map do |group|
       result = group.title.nil? || @not_nil_group_num < 2 ? '' : "#{group.title}:\n"
-      result + normal_message(convert_array(group.files))
+      max_char_length = group.title.nil? ? search_max_char_length + 1 : search_max_char_length + 3 # directoryの方が2つ半角が多い
+      result + normal_message(convert_array(group.files), max_char_length)
     end.join("\n\n")
   end
 
   def convert_array(list)
-    if list.length % MAX_COLUMN != 0
-      # 行列変換させるために足りない要素にnilをつめていく
+    if list.length % MAX_COLUMN != 0 # 行列変換させるために足りない要素にnilをつめていく
       start_fill_nil = list.length + 1
       end_fill_nil = (((list.length / MAX_COLUMN) + 1) * MAX_COLUMN - 1)
       column = (list.length / MAX_COLUMN) + 1
       list.fill(nil, start_fill_nil..end_fill_nil)
     else
-      # 転置してMAX_COLUMN列にするので、sliceではMAX_COLUMN行にする
-      column = (list.length / MAX_COLUMN)
+      column = (list.length / MAX_COLUMN) # 転置してMAX_COLUMN列にするので、sliceではMAX_COLUMN行にする
     end
     list.each_slice(column).map { |split_array| split_array }.transpose
   end
 
-  def normal_message(files)
+  def normal_message(files, max_char_length)
     files.map do |file|
-      file.map.with_index { |name, i| file[i + 1].nil? ? name.to_s : name.to_s.ljust(@max_char_length + 1) }.join
+      file.map.with_index { |name, i| file[i + 1].nil? ? name.to_s : name.to_s.ljust(max_char_length) }.join
     end.join("\n")
   end
 end
