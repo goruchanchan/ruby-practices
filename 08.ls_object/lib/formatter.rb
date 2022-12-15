@@ -34,24 +34,24 @@ class Formatter
   def long_format
     @groups.map do |group|
       if group.title.nil?
-        long_message(files: to_long_files(files: group.files, path: '.'))
+        long_message(files: to_long_format_files(files: group.files, path: '.'))
       else
-        long_files = to_long_files(files: group.files, path: group.title)
+        long_files = to_long_format_files(files: group.files, path: group.title)
         title = @not_nil_group_num > 1 ? "#{group.title}:\n" : ''
         "#{title}total #{total_block_size(files: group.files, path: group.title)}\n#{long_message(files: long_files)}"
       end
     end.join("\n\n")
   end
 
-  def to_long_files(files:, path:)
-    files.map { |file| to_long_file(file: file, path: path) }
+  def to_long_format_files(files:, path:)
+    files.map { |file| to_long_format(file: file, path: path) }
   end
 
   def total_block_size(files:, path:)
     files.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
   end
 
-  def to_long_file(file:, path:)
+  def to_long_format(file:, path:)
     full_path = "#{path}/#{file}"
     long_info = File.lstat(full_path) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
     month = long_info.mtime.to_a[4].to_s.rjust(2)
