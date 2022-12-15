@@ -14,6 +14,12 @@ class Formatter
     @not_nil_group_num = total_not_nil_group
   end
 
+  def to_s
+    @option_long ? long_format : normal_format
+  end
+
+  private
+
   def search_max_char_length
     all_names = @groups.flat_map(&:files)
     all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
@@ -23,10 +29,6 @@ class Formatter
     count = 0
     @groups.each { |group| count += 1 unless group.title.nil? }
     count
-  end
-
-  def to_s
-    @option_long ? long_format : normal_format
   end
 
   def long_format
