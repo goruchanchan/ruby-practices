@@ -10,8 +10,8 @@ class Input
     @option_all = option_all
     @option_reverse = option_reverse
 
-    @paths = paths.empty? ? ['.'] : paths
-    @paths = @option_reverse ? @paths.reverse : @paths
+    @paths = paths
+    organize_paths
 
     @groups = []
     create_groups
@@ -19,11 +19,9 @@ class Input
 
   private
 
-  def separate_by_type
-    files = []
-    directory_paths = []
-    @paths.each { |path| FileTest.directory?(path) ? directory_paths.push(path) : files.push(path) }
-    { files: files, directory_paths: directory_paths }
+  def organize_paths
+    @paths = ['.'] if @paths.empty?
+    @paths = @option_reverse ? @paths.reverse : @paths
   end
 
   def create_groups
@@ -34,5 +32,12 @@ class Input
       names = @option_reverse ? names.sort_by(&:to_s).reverse : names.sort_by(&:to_s)
       @groups.push(FileGroup.new(directory_path, names))
     end
+  end
+
+  def separate_by_type
+    files = []
+    directory_paths = []
+    @paths.each { |path| FileTest.directory?(path) ? directory_paths.push(path) : files.push(path) }
+    { files: files, directory_paths: directory_paths }
   end
 end

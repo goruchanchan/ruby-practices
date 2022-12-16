@@ -39,6 +39,15 @@ class LsCommandTest < Minitest::Test
     assert_equal expected, Formatter.new(groups: input.groups, option_long: true).to_s
   end
 
+  def test_directory_no_argument
+    expected = <<~TEXT.chomp
+      Gemfile         bin             test
+      Gemfile.lock    lib
+    TEXT
+    input = Input.new(paths: %w[], option_all: false, option_reverse: false)
+    assert_equal expected, Formatter.new(groups: input.groups, option_long: false).to_s
+  end
+
   def test_directory_no_option
     expected = <<~TEXT.chomp
       Gemfile         bin             test
