@@ -53,14 +53,14 @@ class Formatter
 
   def to_long_format(file:, path:)
     full_path = "#{path}/#{file}"
-    long_info = File.lstat(full_path) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
-    month = long_info.mtime.to_a[4].to_s.rjust(2)
-    day = long_info.mtime.to_a[3].to_s.rjust(2)
-    clock = long_info.mtime.to_a[2].to_s.rjust(2, '0')
-    minitus = long_info.mtime.to_a[1].to_s.rjust(2, '0')
-    file = "#{file} -> #{File.readlink(full_path)}" if long_info.symlink?
-    ["#{file_type(full_path: full_path)}#{file_permit(mode: long_info.mode)}",
-     long_info.nlink, Etc.getpwuid(long_info.uid).name, Etc.getgrgid(long_info.gid).name, long_info.size,
+    stat = File.lstat(full_path) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
+    month = stat.mtime.to_a[4].to_s.rjust(2)
+    day = stat.mtime.to_a[3].to_s.rjust(2)
+    clock = stat.mtime.to_a[2].to_s.rjust(2, '0')
+    minitus = stat.mtime.to_a[1].to_s.rjust(2, '0')
+    file = "#{file} -> #{File.readlink(full_path)}" if stat.symlink?
+    ["#{file_type(full_path: full_path)}#{file_permit(mode: stat.mode)}",
+     stat.nlink, Etc.getpwuid(stat.uid).name, Etc.getgrgid(stat.gid).name, stat.size,
      "#{month} #{day} #{clock}:#{minitus}", file]
   end
 
