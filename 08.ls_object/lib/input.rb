@@ -14,18 +14,22 @@ class Input
     @paths = @option_reverse ? @paths.reverse : @paths
 
     @groups = []
-    classfy_type
+    create_groups
   end
 
   private
 
-  def classfy_type
+  def separate_by_type
     files = []
-    directories_path = []
-    @paths.each { |path| FileTest.directory?(path) ? directories_path.push(path) : files.push(path) }
+    directories = []
+    @paths.each { |path| FileTest.directory?(path) ? directories.push(path) : files.push(path) }
+    { files: files, directories: directories }
+  end
 
-    @groups.push(FileGroup.new(nil, files)) unless files.empty?
-    directories_path.each { |path| @groups.push(FileGroup.new(path, parse_option(path: path))) }
+  def create_groups
+    separated_group = separate_by_type
+    @groups.push(FileGroup.new(nil, separated_group[:files])) unless separated_group[:files].empty?
+    separated_group[:directories].each { |directory| @groups.push(FileGroup.new(directory, parse_option(path: directory))) }
   end
 
   def parse_option(path:)
