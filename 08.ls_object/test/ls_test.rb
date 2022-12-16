@@ -1,10 +1,10 @@
-# frozen_string_literalong: true
+# frozen_string_literal: true
 
 require 'minitest/autorun'
 require_relative '../lib/input'
 require_relative '../lib/formatter'
 
-class LsCommandTest < Minitest::Test
+class LsFileTest < Minitest::Test
   def test_file_no_option
     expected = <<~TEXT.chomp
       Gemfile       Gemfile.lock
@@ -38,7 +38,9 @@ class LsCommandTest < Minitest::Test
     input = Input.new(paths: %w[Gemfile Gemfile.lock], option_all: false, option_reverse: true)
     assert_equal expected, Formatter.new(groups: input.groups, option_long: true).to_s
   end
+end
 
+class LsDirectoryTest < Minitest::Test
   def test_directory_no_argument
     expected = <<~TEXT.chomp
       Gemfile         bin             test
