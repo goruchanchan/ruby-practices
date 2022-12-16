@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative '../lib/file_group'
+FileGroup = Struct.new(:title, :files)
 
 class Input
   attr_reader :groups
@@ -24,8 +24,8 @@ class Input
     directories_path = []
     @paths.each { |path| FileTest.directory?(path) ? directories_path.push(path) : files.push(path) }
 
-    @groups.push(FileGroup.new(title: nil, files: files)) unless files.empty?
-    directories_path.each { |path| @groups.push(FileGroup.new(title: path, files: parse_option(path: path))) }
+    @groups.push(FileGroup.new(nil, files)) unless files.empty?
+    directories_path.each { |path| @groups.push(FileGroup.new(path, parse_option(path: path))) }
   end
 
   def parse_option(path:)
