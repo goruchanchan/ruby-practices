@@ -21,8 +21,8 @@ class Formatter
   private
 
   def search_max_char_length
-    all_names = @groups.flat_map(&:files)
-    all_names.empty? ? 0 : all_names.max_by(&:length).length + 1
+    all_path = @groups.flat_map(&:files).map(&:path)
+    all_path.empty? ? 0 : all_path.max_by(&:length).length + 1
   end
 
   def total_not_nil_group
@@ -37,42 +37,22 @@ class Formatter
         long_message(files: to_long_format_files(files: group.files, path: '.'))
       else
         title = @not_nil_group_num > 1 ? "#{group.title}:\n" : ''
-        block_size = total_block_size(files: group.files, path: group.title)
-        "#{title}total #{block_size}\n#{long_message(files: to_long_format_files(files: group.files, path: group.title))}"
+        block_size = total_block_size(group: group)
+        "#{title}total #{block_size}\n#{long_message(files: to_long_format_files(files: group.files))}"
       end
     end.join("\n\n")
   end
 
-  def to_long_format_files(files:, path:)
-    files.map { |file| to_long_format(file: file, path: path) }
+  def to_long_format_files(files:)
+    files.map { |file| to_long_format(file: file) }
   end
 
-  def total_block_size(files:, path:)
-    files.map { |file| File.lstat("#{path}/#{file}").blocks }.sum
+  def total_block_size(group:)
+    group.files.map { |file| File.lstat("#{group.title}/#{file.path}").blocks }.sum
   end
 
-  def to_long_format(file:, path:)
-    full_path = "#{path}/#{file}"
-    stat = File.lstat(full_path) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
-    month = stat.mtime.to_a[4].to_s.rjust(2)
-    day = stat.mtime.to_a[3].to_s.rjust(2)
-    clock = stat.mtime.to_a[2].to_s.rjust(2, '0')
-    minitus = stat.mtime.to_a[1].to_s.rjust(2, '0')
-    file = "#{file} -> #{File.readlink(full_path)}" if stat.symlink?
-    ["#{file_type(full_path: full_path)}#{file_permit(mode: stat.mode)}",
-     stat.nlink, Etc.getpwuid(stat.uid).name, Etc.getgrgid(stat.gid).name, stat.size,
-     "#{month} #{day} #{clock}:#{minitus}", file]
-  end
-
-  def file_type(full_path:)
-    { file: '-', directory: 'd', link: 'l' }[File.ftype(full_path).intern]
-  end
-
-  def file_permit(mode:)
-    owener = ((mode >> 6) % 8)
-    group = ((mode >> 3) % 8)
-    other = mode % 8
-    "#{PERMISSIONS[owener]}#{PERMISSIONS[group]}#{PERMISSIONS[other]}"
+  def to_long_format(file:)
+    [file.attribute, file.nlink, file.uname, file.gname, file.size, file.time, file.symlink]
   end
 
   def long_message(files:)
@@ -112,7 +92,9 @@ class Formatter
 
   def normal_message(files:, max_char_length:)
     files.map do |file|
-      file.map.with_index { |name, i| file[i + 1].nil? ? name.to_s : name.to_s.ljust(max_char_length) }.join
+      file.map.with_index do |name, i|
+        file[i + 1].nil? ? name.path : name.path.ljust(max_char_length) unless name.nil?
+      end.join
     end.join("\n")
   end
 end

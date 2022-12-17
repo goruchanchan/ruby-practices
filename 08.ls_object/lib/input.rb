@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require_relative 'file_detail'
+
 FileGroup = Struct.new(:title, :files)
 
 class Input
@@ -13,6 +15,12 @@ class Input
     @paths = paths
     organize_paths
 
+    @file_paths = []
+    @directory_paths = []
+    separate_by_type
+    @files = make_files_detail
+    @directories = make_directories_detail
+
     @groups = []
     create_groups
   end
@@ -24,20 +32,27 @@ class Input
     @paths = @option_reverse ? @paths.reverse : @paths
   end
 
-  def create_groups
-    separated_group = separate_by_type
-    @groups.push(FileGroup.new(nil, separated_group[:files])) unless separated_group[:files].empty?
-    separated_group[:directory_paths].each do |directory_path|
-      names = @option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: directory_path).push('..') : Dir.glob('*', base: directory_path)
-      names = @option_reverse ? names.sort_by(&:to_s).reverse : names.sort_by(&:to_s)
-      @groups.push(FileGroup.new(directory_path, names))
+  def separate_by_type
+    @paths.each { |path| FileTest.directory?(path) ? @directory_paths.push(path) : @file_paths.push(path) }
+  end
+
+  def make_files_detail
+    @file_paths.nil? ? [] : @file_paths.map { |path| FileDetail.new(path: path) }
+  end
+
+  def make_directories_detail
+    return [] if @directory_paths.nil?
+
+    @directory_paths.map do |directory_path|
+      paths = @option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: directory_path).push('..') : Dir.glob('*', base: directory_path)
+      paths = @option_reverse ? paths.sort_by(&:to_s).reverse : paths.sort_by(&:to_s)
+      files = paths.map { |path| FileDetail.new(path: path) }
+      { path: directory_path, files: files }
     end
   end
 
-  def separate_by_type
-    files = []
-    directory_paths = []
-    @paths.each { |path| FileTest.directory?(path) ? directory_paths.push(path) : files.push(path) }
-    { files: files, directory_paths: directory_paths }
+  def create_groups
+    @groups.push(FileGroup.new(nil, @files)) unless @files.empty?
+    @directories.map { |directory| @groups.push(FileGroup.new(directory[:path], directory[:files])) }
   end
 end
