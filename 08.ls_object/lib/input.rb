@@ -21,7 +21,7 @@ class Input
     @files = make_files_detail
     @directories = make_directories_detail
 
-    @groups = []
+    @groups = { group: [], max_char_length: 0, directories_num: 0 }
     create_groups
   end
 
@@ -37,22 +37,25 @@ class Input
   end
 
   def make_files_detail
-    @file_paths.nil? ? [] : @file_paths.map { |path| FileDetail.new(path: path) }
+    @file_paths.nil? ? [] : @file_paths.map { |path| FileDetail.new(path: nil, name: path) }
   end
 
   def make_directories_detail
     return [] if @directory_paths.nil?
 
     @directory_paths.map do |directory_path|
-      paths = @option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: directory_path).push('..') : Dir.glob('*', base: directory_path)
-      paths = @option_reverse ? paths.sort_by(&:to_s).reverse : paths.sort_by(&:to_s)
-      files = paths.map { |path| FileDetail.new(path: path) }
+      names = @option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: directory_path).push('..') : Dir.glob('*', base: directory_path)
+      names = @option_reverse ? names.sort_by(&:to_s).reverse : names.sort_by(&:to_s)
+      files = names.map { |name| FileDetail.new(path: directory_path, name: name) }
       { path: directory_path, files: files }
     end
   end
 
   def create_groups
-    @groups.push(FileGroup.new(nil, @files)) unless @files.empty?
-    @directories.map { |directory| @groups.push(FileGroup.new(directory[:path], directory[:files])) }
+    @groups[:group].push(FileGroup.new(nil, @files)) unless @files.empty?
+    @directories.map { |directory| @groups[:group].push(FileGroup.new(directory[:path], directory[:files])) }
+
+    all_files = @groups[:group].flat_map(&:files).map(&:path)
+    @groups[:max_char_length] = all_files.empty? ? 0 : all_files.max_by(&:length).length + 1
   end
 end

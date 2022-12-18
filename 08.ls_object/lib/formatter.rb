@@ -9,9 +9,9 @@ class Formatter
   MAX_COLUMN = 3
 
   def initialize(groups:, option_long:)
-    @groups = groups
+    @groups = groups[:group]
+    @max_char_length = groups[:max_char_length]
     @option_long = option_long
-    @not_nil_group_num = total_not_nil_group
   end
 
   def to_s
@@ -20,42 +20,21 @@ class Formatter
 
   private
 
-  def search_max_char_length
-    all_path = @groups.flat_map(&:files).map(&:path)
-    all_path.empty? ? 0 : all_path.max_by(&:length).length + 1
-  end
-
-  def total_not_nil_group
-    count = 0
-    @groups.each { |group| count += 1 unless group.title.nil? }
-    count
-  end
-
   def long_format
     @groups.map do |group|
       if group.title.nil?
-        long_message(files: to_long_format_files(files: group.files, path: '.'))
+        long_message(files: group.files)
       else
-        title = @not_nil_group_num > 1 ? "#{group.title}:\n" : ''
+        title = @groups.size > 1 ? "#{group.title}:\n" : ''
         block_size = total_block_size(group: group)
-        "#{title}total #{block_size}\n#{long_message(files: to_long_format_files(files: group.files))}"
+        message = long_message(files: group.files)
+        "#{title}total #{block_size}\n#{message}"
       end
     end.join("\n\n")
   end
 
-  def to_long_format_files(files:)
-    files.map { |file| to_long_format(file: file) }
-  end
-
-  def total_block_size(group:)
-    group.files.map { |file| File.lstat("#{group.title}/#{file.path}").blocks }.sum
-  end
-
-  def to_long_format(file:)
-    [file.attribute, file.nlink, file.uname, file.gname, file.size, file.time, file.symlink]
-  end
-
   def long_message(files:)
+    files = to_long_format(files: files)
     paddings = (0..6).map { |n| Matrix.columns(files).row(n).max.to_s.length }
 
     files.map do |file|
@@ -70,12 +49,29 @@ class Formatter
     end.join("\n")
   end
 
+  def to_long_format(files:)
+    files.map { |file| [file.attribute, file.nlink, file.uname, file.gname, file.size, file.time, file.name] }
+  end
+
+  def total_block_size(group:)
+    group.files.map { |file| File.lstat(file.path).blocks }.sum
+  end
+
   def normal_format
     @groups.map do |group|
-      result = group.title.nil? || @not_nil_group_num < 2 ? '' : "#{group.title}:\n"
-      max_char_length = group.title.nil? ? search_max_char_length + 1 : search_max_char_length + 3 # directoryの方が2つ半角が多い
-      result + normal_message(files: to_matrix(files: group.files), max_char_length: max_char_length)
+      result = group.title.nil? || @groups.size < 2 ? '' : "#{group.title}:\n"
+      result + normal_message(files: group.files, max_char_length: @max_char_length + 1)
     end.join("\n\n")
+  end
+
+  def normal_message(files:, max_char_length:)
+    to_matrix(files: files).map do |file|
+      file.map.with_index do |name, i|
+        next if name.nil?
+
+        file[i + 1].nil? ? name.name : name.name.ljust(max_char_length)
+      end.join
+    end.join("\n")
   end
 
   def to_matrix(files:)
@@ -88,13 +84,5 @@ class Formatter
       column = (files.length / MAX_COLUMN) # 転置してMAX_COLUMN列にするので、sliceではMAX_COLUMN行にする
     end
     files.each_slice(column).map { |split_array| split_array }.transpose
-  end
-
-  def normal_message(files:, max_char_length:)
-    files.map do |file|
-      file.map.with_index do |name, i|
-        file[i + 1].nil? ? name.path : name.path.ljust(max_char_length) unless name.nil?
-      end.join
-    end.join("\n")
   end
 end

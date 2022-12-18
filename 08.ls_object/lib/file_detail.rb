@@ -2,12 +2,12 @@
 # frozen_string_literal: true
 
 class FileDetail
-  attr_reader :path, :attribute, :nlink, :uname, :gname, :size, :time, :symlink
+  attr_reader :path, :name, :attribute, :nlink, :uname, :gname, :size, :time, :symlink
 
   PERMISSIONS = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'].freeze
 
-  def initialize(path:)
-    @path = path
+  def initialize(path:, name:)
+    @path = analyze_path(path: path, name: name)
     @stat = File.lstat(@path) # statだとシンボリックリンクのパスが元ファイルになってしまうので、lstat
     @attribute = analyze_attribure
     @nlink = analyze_nlink
@@ -15,10 +15,14 @@ class FileDetail
     @gname = analyze_group_name
     @size = analyze_size
     @time = analyze_time
-    @symlink = analyze_symlink
+    @name = analyze_symlink(name: name)
   end
 
   private
+
+  def analyze_path(path:, name:)
+    path.nil? ? name : "#{path}/#{name}"
+  end
 
   def analyze_attribure
     "#{type_to_s}#{permit_to_s}"
@@ -59,7 +63,7 @@ class FileDetail
     "#{month} #{day} #{clock}:#{minitus}"
   end
 
-  def analyze_symlink
-    "#{@path} -> #{File.readlink(@path)}" if @stat.symlink?
+  def analyze_symlink(name:)
+    @stat.symlink? ? "#{@path} -> #{File.readlink(@path)}" : name
   end
 end
