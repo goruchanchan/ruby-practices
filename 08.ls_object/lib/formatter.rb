@@ -26,9 +26,8 @@ class Formatter
         long_message(files: group.files)
       else
         title = @groups.size > 1 ? "#{group.title}:\n" : ''
-        block_size = total_block_size(group: group)
         message = long_message(files: group.files)
-        "#{title}total #{block_size}\n#{message}"
+        "#{title}total #{group.total_block_size}\n#{message}"
       end
     end.join("\n\n")
   end
@@ -51,10 +50,6 @@ class Formatter
 
   def to_long_format(files:)
     files.map { |file| [file.attribute, file.nlink, file.uname, file.gname, file.size, file.time, file.name] }
-  end
-
-  def total_block_size(group:)
-    group.files.map { |file| File.lstat(file.path).blocks }.sum
   end
 
   def normal_format
