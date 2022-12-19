@@ -9,6 +9,11 @@ class FileGroup
     @total_block_size = sum_block_size
   end
 
+  def self.max_char_length(group:)
+    max_length = group.files.flat_map(&:name).max_by(&:length).length
+    group.title.nil? ? max_length + 1 : max_length + 3 # File と Directory でスペースの開け方が異なる
+  end
+
   private
 
   def sum_block_size

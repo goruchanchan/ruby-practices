@@ -8,8 +8,8 @@ class Formatter
   MAX_COLUMN = 3
 
   def initialize(groups:, option_long:)
-    @groups = groups[:group]
-    @max_char_length = groups[:max_char_length]
+    @groups = groups
+    @max_char_length = search_max_char_length
     @option_long = option_long
   end
 
@@ -18,6 +18,10 @@ class Formatter
   end
 
   private
+
+  def search_max_char_length
+    @groups.map { |group| FileGroup.max_char_length(group: group) }.max
+  end
 
   def long_format
     @groups.map do |group|

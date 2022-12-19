@@ -17,9 +17,7 @@ class Input
     @files = make_files_detail
     @directories = make_directories_detail
 
-    @groups = { group: [], max_char_length: 0 }
-    @groups[:group] = create_groups
-    @groups[:max_char_length] = search_max_char_length
+    @groups = create_groups
   end
 
   private
@@ -57,10 +55,5 @@ class Input
     else
       [FileGroup.new(title: nil, files: @files)].concat(@directories.map { |directory| FileGroup.new(title: directory[:path], files: directory[:files]) })
     end
-  end
-
-  def search_max_char_length
-    all_files = @groups[:group].flat_map(&:files).map(&:path)
-    all_files.empty? ? 0 : all_files.max_by(&:length).length + 1
   end
 end
