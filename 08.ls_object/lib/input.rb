@@ -37,7 +37,7 @@ class Input
   end
 
   def make_files_detail
-    @paths[:file].nil? ? [] : @paths[:file].map { |path| FileDetail.new(path: nil, name: path) }
+    @paths[:file].nil? ? [] : @paths[:file].map { |path| FileDetail.new(input_path: nil, input_name: path) }
   end
 
   def make_directories_detail
@@ -46,7 +46,7 @@ class Input
     @paths[:directory].map do |directory_path|
       names = @option_all ? Dir.glob('*', File::FNM_DOTMATCH, base: directory_path).push('..') : Dir.glob('*', base: directory_path)
       names = @option_reverse ? names.sort_by(&:to_s).reverse : names.sort_by(&:to_s)
-      files = names.map { |name| FileDetail.new(path: directory_path, name: name) }
+      files = names.map { |name| FileDetail.new(input_path: directory_path, input_name: name) }
       { path: directory_path, files: files }
     end
   end
