@@ -63,7 +63,7 @@ class Formatter
   end
 
   def normal_message(files:, max_char_length:)
-    to_matrix(files: files).map do |file|
+    to_normal_format(files: files).map do |file|
       file.map.with_index do |name, i|
         next if name.nil?
 
@@ -72,7 +72,7 @@ class Formatter
     end.join("\n")
   end
 
-  def to_matrix(files:)
+  def to_normal_format(files:)
     if files.length % MAX_COLUMN != 0 # 行列変換させるために足りない要素にnilをつめていく
       start_fill_nil = files.length + 1
       end_fill_nil = (((files.length / MAX_COLUMN) + 1) * MAX_COLUMN - 1)
